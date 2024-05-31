@@ -18,6 +18,7 @@ public class RewardController {
     @Autowired
     RewardService rewardService;
 
+    //obtenir la liste des  récompenses
     @GetMapping
     public List<Reward> getRewards() {
         return rewardService.getAllRewards();

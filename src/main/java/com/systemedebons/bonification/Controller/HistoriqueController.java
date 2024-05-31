@@ -46,7 +46,12 @@ public class HistoriqueController {
     }
 
 
+    @GetMapping("/users/{UserId}")
+    public ResponseEntity<List<Historique>> getHistoriqueByUserId(@PathVariable String UserId) {
+        List<Historique> historiqueList = historiqueService.getHistoriqueByUserId(UserId);
+        return ResponseEntity.ok(historiqueList);
 
+    }
 
 
 

@@ -10,7 +10,7 @@ public class Reward {
 
 
     @Id
-    private String id;
+    private String  id;
     private String nom;
     private String description;
     private int points;

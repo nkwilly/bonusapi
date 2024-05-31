@@ -1,6 +1,7 @@
 package com.systemedebons.bonification.Service;
 
 import com.systemedebons.bonification.Entity.Rule;
+import com.systemedebons.bonification.Entity.Transaction;
 import com.systemedebons.bonification.Repository.RuleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
@@ -30,4 +31,31 @@ public class RuleService {
     public void deleteRule(String id) {
         ruleRepository.deleteById(id);
     }
+
+    public boolean estUneTransactionEligible(Transaction transaction) {
+
+        List<Rule> rules = ruleRepository.findAll();
+        for (Rule rule : rules) {
+            if(transaction.getMontant() >= rule.getMontantMin()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int calculerPoints(Transaction transaction) {
+
+        int points = 0;
+
+        List<Rule> rules = ruleRepository.findAll();
+        for (Rule rule : rules) {
+            if(transaction.getMontant() >= rule.getMontantMin()){
+                points += rule.getPoints();
+            }
+        }
+        return points;
+    }
+
+
+
 }

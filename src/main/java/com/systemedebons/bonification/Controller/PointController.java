@@ -41,7 +41,16 @@ public class PointController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/Solde/{UserId}")
+    public ResponseEntity<Integer> getSoldePoint(@PathVariable String UserId) {
 
+        int solde = pointService.getSoldePoints(UserId);
+
+        return ResponseEntity.ok(solde);
+
+
+
+    }
 
 
 

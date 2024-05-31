@@ -32,6 +32,9 @@ public class PointService {
         pointRepository.deleteById(id);
     }
 
-
+    public int getSoldePoints(String UserId) {
+        List<Point> points = pointRepository.findByUserId(UserId);
+        return points.stream().mapToInt(Point::getNombre).sum();
+    }
 
 }

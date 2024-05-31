@@ -41,6 +41,18 @@ public class RewardController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/echanger/{UserId}/{id}")
+    public ResponseEntity<Void> exchangesPoints(@PathVariable String UserId, @PathVariable  String id) {
+        boolean success = rewardService.exchangePoints(UserId, id);
+
+        if (success) {
+            return ResponseEntity.ok().build();
+        }else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
 
 
         }

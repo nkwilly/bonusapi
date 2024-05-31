@@ -9,7 +9,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Administrator {
 
   @Id
-  private  String  id;
+ private String administratorId;
+  private String name;
+  private String surname;
   private String  username;
   private String  email;
   private String  password;

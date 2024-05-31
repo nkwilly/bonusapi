@@ -41,6 +41,12 @@ public class AdminController {
 
 
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Administrator> getAdministrateurById(@PathVariable String id) {
+        Optional<Administrator> administrator = adminService.getAdministrator(id);
+        return administrator.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Administrator> updateAdministrator(@PathVariable String id, @RequestBody Administrator updateAdministrator) {
@@ -68,13 +74,9 @@ public class AdminController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Administrator> deleteAdministrator(@PathVariable String id) {
-        if(administratorRepository.existsById(id)) {
-            administratorRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }else{
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteAdministrateur(@PathVariable String id) {
+        adminService.deleteAdministrator(id);
+        return ResponseEntity.noContent().build();
     }
 
 

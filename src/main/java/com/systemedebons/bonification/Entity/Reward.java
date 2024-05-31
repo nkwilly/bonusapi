@@ -4,17 +4,14 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
-
 @Data
-@Document(collection = "points")
-public class Point {
+@Document(collection = "Reward")
+public class Reward {
+
 
     @Id
     private String id;
-    private String UserId;
-    private int nombre;
-    private LocalDate date;
-
-
+    private String nom;
+    private String description;
+    private int points;
 }

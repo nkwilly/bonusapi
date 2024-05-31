@@ -11,10 +11,7 @@ public class Rule {
 
     @Id
     private String id;
-
-    private float minAmount;
-
-    private float maxAmount;
-
-    private int PointsToAttribute;
+    private String typeRegle;
+    private float montantMin;
+    private int points;
 }

@@ -80,7 +80,7 @@ public class RuleService {
  }
  public void deleteBonificationRule(String Id) {
      ruleRepository.deleteById(Id);
- }
+ }  
 **/
 
 }

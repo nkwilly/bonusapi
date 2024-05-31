@@ -7,14 +7,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDate;
 
 @Data
-@Document(collection = "points")
-public class Point {
-
+@Document(collection = "historiques")
+public class Historique {
     @Id
     private String id;
     private String UserId;
-    private int nombre;
     private LocalDate date;
-
-
+    private String type;
+    private int points;
+    private  float montantTransaction;
 }

@@ -3,6 +3,7 @@ package com.systemedebons.bonification.Controller;
 import com.systemedebons.bonification.Entity.Administrator;
 import com.systemedebons.bonification.Repository.AdministratorRepository;
 import com.systemedebons.bonification.Service.AdminService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@Api
 @RestController
 @RequestMapping("/api/administrator")
 public class AdminController {

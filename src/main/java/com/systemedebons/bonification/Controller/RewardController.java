@@ -2,13 +2,14 @@ package com.systemedebons.bonification.Controller;
 
 import com.systemedebons.bonification.Entity.Reward;
 import com.systemedebons.bonification.Service.RewardService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-
+@Api
 @RestController
 @RequestMapping("api/rewards")
 public class RewardController {

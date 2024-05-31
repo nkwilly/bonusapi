@@ -59,15 +59,15 @@ public class AdminControllerTests {
     void testCreateAdmin() throws Exception {
         Administrator admin = new Administrator();
         admin.setAdministratorId("1");
-        when(adminService.createAdministrator(admin)).thenReturn(admin);
+        when(adminService.createAdministrator(any(Administrator.class))).thenReturn(admin);
 
 
         mockMvc.perform(post("/api/administrator")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nom\":\"John\",\"prenom\":\"Doe\",\"email\":\"john.doe@example.com\",\"motDePasse\":\"password\"}"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.administratorId").value("1"));
+                        .content("{\"nom\":\"John\",\"prenom\":\"Doe\",\"username\":\"Doe\",\"email\":\"john.doe@example.com\",\"motDePasse\":\"password\"}"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.administratorId").value("1"));
     }
 
 

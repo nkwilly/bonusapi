@@ -27,11 +27,12 @@ public class AdminController {
         return adminService.createAdministrator(administrator);
     }
 
-    @PostMapping("/login")
+    /**
+     *@PostMapping("/login")
     public Administrator login(@RequestParam String username, @RequestParam String password) {
 
         return adminService.login(username, password);
-    }
+    }**/
 
 
     @GetMapping

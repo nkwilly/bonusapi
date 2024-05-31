@@ -10,11 +10,11 @@ public class Administrator {
 
   @Id
  private String administratorId;
-  private String name;
-  private String surname;
+  private String nom;
+  private String prenom;
   private String  username;
   private String  email;
-  private String  password;
+  private String  motDePasse;
 
 
 }

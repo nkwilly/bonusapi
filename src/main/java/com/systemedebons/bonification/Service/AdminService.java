@@ -21,7 +21,7 @@ public class AdminService {
     }
 
 
-    public Administrator login(String username, String password) {
+  /**  public Administrator login(String username, String password) {
         Administrator administrator = administratorRepository.findByUsername(username);
         if (administrator != null && administrator.getPassword().equals(password)) {
 
@@ -29,7 +29,7 @@ public class AdminService {
         }else {
             return null;
         }
-    }
+    }**/
 
     public List<Administrator> getAdmins() {
         return administratorRepository.findAll();

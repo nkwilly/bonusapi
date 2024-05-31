@@ -1,8 +1,8 @@
 package com.systemedebons.bonification;
 
-import com.systemedebons.bonification.Controller.UserController;
-import com.systemedebons.bonification.Entity.User;
-import com.systemedebons.bonification.Service.UserService;
+import com.systemedebons.bonification.Controller.TransactionController;
+import com.systemedebons.bonification.Entity.Transaction;
+import com.systemedebons.bonification.Service.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,82 +11,76 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import java.util.Collections;
 import java.util.Optional;
-
-import org.springframework.http.MediaType;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.web.servlet.function.RequestPredicates.contentType;
 
-public class UserControllerTest {
+
+
+
+public class TransactionControllerTest {
 
     @InjectMocks
-    private UserController userController;
+    private TransactionController transactionController;
 
     @Mock
-    private UserService userService;
+    private TransactionService transactionService;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(transactionController).build();
     }
 
     @Test
-    void testGetUser() throws Exception {
-        when(userService.getAllUsers()).thenReturn(Collections.emptyList());
+    void testGetAllTransactions() throws Exception {
+        when(transactionService.getAllTransactions()).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/user"))
+        mockMvc.perform(get("/api/transactions"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
-
     }
 
-
-
     @Test
-    void testGetUserById() throws Exception {
-        User user = new User();
-        user.setId("1");
-        when(userService.getUserById("1")).thenReturn(Optional.of(user));
+    void testGetTransactionById() throws Exception {
+        Transaction transaction = new Transaction();
+        transaction.setId("1");
+        when(transactionService.getTransactionById("1")).thenReturn(Optional.of(transaction));
 
-        mockMvc.perform(get("/api/user/1"))
+        mockMvc.perform(get("/api/transactions/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value("1"));
     }
+
     @Test
-    void testCreateUser() throws Exception {
+    void testCreateTransaction() throws Exception {
+        Transaction transaction = new Transaction();
+        transaction.setId("1");
+        when(transactionService.saveTransaction(any(Transaction.class))).thenReturn(transaction);
 
-        User user = new User();
-        user.setId("1");
-        when(userService.saveUser(any(User.class))).thenReturn(user);
-
-
-        mockMvc.perform(post("/api/user")
+        mockMvc.perform(post("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nom\":\"John\",\"prenom\":\"Doe\",\"email\":\"john.doe@example.com\",\"motDePasse\":\"password\"}"))
+                        .content("{\"date\":\"2023-05-31\",\"montant\":100.0,\"type\":\"Achat\",\"statut\":\"Complété\"}"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value("1"));
     }
 
     @Test
-    void testDeleteUser() throws Exception {
-        doNothing().when(userService).deleteUser("1");
+    void testDeleteTransaction() throws Exception {
+        doNothing().when(transactionService).deleteTransaction("1");
 
-        mockMvc.perform(delete("/api/user/1"))
+        mockMvc.perform(delete("/api/transactions/1"))
                 .andExpect(status().isNoContent());
     }
-
-
-
 
 }

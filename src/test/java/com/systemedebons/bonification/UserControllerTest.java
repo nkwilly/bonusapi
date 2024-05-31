@@ -69,11 +69,13 @@ public class UserControllerTest {
         user.setId("1");
         when(userService.saveUser(any(User.class))).thenReturn(user);
 
-        mockMvc.perform(post("/api/user"))
+
+        mockMvc.perform(post("/api/user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"nom\":\"John\",\"prenom\":\"Doe\",\"email\":\"john.doe@example.com\",\"motDePasse\":\"password\"}"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value("1"));
-
     }
 
     @Test

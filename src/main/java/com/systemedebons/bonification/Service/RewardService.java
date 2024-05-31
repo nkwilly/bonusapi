@@ -27,8 +27,8 @@ public class RewardService {
 
     }
 
-    public void deleteReward(Reward reward) {
-        rewardRepository.delete(reward);
+    public void deleteReward(String id) {
+        rewardRepository.deleteById(id);
     }
 
 

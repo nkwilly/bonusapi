@@ -1,18 +1,44 @@
 package com.systemedebons.bonification.Controller;
 
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.systemedebons.bonification.Entity.Point;
+import com.systemedebons.bonification.Service.PointService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/points")
 public class PointController {
 
-    @GetMapping("/sayhello")
-    public  String sayhello(){
-    return "Hello World";
+
+    @Autowired
+    private PointService pointService;
+
+    @GetMapping
+    public List<Point> getAllPoints() {
+        return pointService.getAllPoints();
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Point> getPointById(@PathVariable String id) {
+        Optional<Point> point = pointService.getPointById(id);
+        return point.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public Point createPoint(@RequestBody Point point) {
+        return pointService.savePoint(point);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePoint(@PathVariable String id) {
+        pointService.deletePoint(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 

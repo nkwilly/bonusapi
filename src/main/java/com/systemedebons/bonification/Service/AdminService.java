@@ -16,9 +16,12 @@ public class AdminService {
     @Autowired
     private AdministratorRepository administratorRepository;
 
+
     public Administrator createAdministrator(Administrator administrator) {
         return  administratorRepository.save(administrator);
     }
+
+
 
 
   /**  public Administrator login(String username, String password) {

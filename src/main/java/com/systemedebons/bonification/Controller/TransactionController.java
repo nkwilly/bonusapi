@@ -29,8 +29,9 @@ public class TransactionController {
     }
 
     @PostMapping
-    public Transaction createTransaction(@RequestBody Transaction transaction) {
-        return transactionService.saveTransaction(transaction);
+    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
+        Transaction savedTransaction = transactionService.saveTransaction(transaction);
+        return ResponseEntity.ok(savedTransaction);
     }
 
     @DeleteMapping("/{id}")

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -18,6 +19,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
 
     public List<User> getAllUsers() {
@@ -37,7 +41,10 @@ public class UserService {
             } else{
                 throw new IllegalArgumentException("Mot de Passe ne peut pas être null ou  vide");
             }
-        return userRepository.save(user);
+            User userSaved = userRepository.save(user);
+            emailService.sendWelcomeEmail(user.getEmail());
+
+        return userSaved;
     }
 
 
@@ -46,8 +53,27 @@ public class UserService {
     }
 
 
+    public void resetPassword(String email) {
 
+        Optional<User> user = userRepository.findById(email);
+        if(user.isPresent()) {
+            User userSaved = user.get();
+            String token = UUID.randomUUID().toString();
+            emailService.sendPasswordResetEmail(userSaved.getEmail(), token);
+        }
+    }
 
+    public void updatePassword(String token, String newPassword) {
+        Optional<User> userOptional = userRepository.findByResetToken(token);
+        if(userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setMotDePasse(passwordEncoder.encode(newPassword));
+            user.setResetToken(null);
+            userRepository.save(user);
+        }else{
+            throw new IllegalArgumentException("Token invalide ou expiré");
+        }
+    }
 
 
 }

@@ -20,4 +20,16 @@ public class EmailService {
 
     }
 
+    public void sendWelcomeEmail(String to) {
+        String subject = "Bienvenue chez nous!";
+        String text = "Merci de vous être inscrit!";
+        sendEmail(to, subject, text);
+    }
+
+    public void sendPasswordResetEmail(String to, String token) {
+        String subject = "Réinitialisation de votre mot de passe";
+        String text = "Cliquez sur le lien pour réinitialiser votre mot de passe : " + "http://localhost:8080/reset-password?token=" + token;
+        sendEmail(to, subject, text);
+    }
+
 }

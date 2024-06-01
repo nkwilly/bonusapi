@@ -48,10 +48,11 @@ public class PointController {
 
         return ResponseEntity.ok(solde);
 
-
-
     }
-
+    @GetMapping("/user/{UserId}")
+    public List<Point> getPointsByUtilisateurId(@PathVariable String UserId) {
+        return pointService.getPointsByUserId(UserId);
+    }
 
 
 

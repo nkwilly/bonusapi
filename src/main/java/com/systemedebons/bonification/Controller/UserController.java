@@ -54,6 +54,25 @@ public class UserController {
     }
 
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<User> forgotPassword(@RequestParam String email) {
+
+        userService.resetPassword(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<User> resetPassword(@RequestParam String token , @RequestParam String newPassword) {
+    try{
+        userService.updatePassword(token, newPassword);
+        return ResponseEntity.noContent().build();
+    }catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+
+    }
+
 
 
 }

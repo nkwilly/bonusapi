@@ -16,4 +16,5 @@ public class Historique {
     private String type;
     private int points;
     private  float montantTransaction;
+    private String description;
 }

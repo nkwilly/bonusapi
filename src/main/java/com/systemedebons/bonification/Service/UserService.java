@@ -32,8 +32,11 @@ public class UserService {
 
 
     public  User saveUser(User user) {
-
-        user.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+            if(user.getMotDePasse() != null && !user.getMotDePasse().isEmpty()) {
+                user.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+            } else{
+                throw new IllegalArgumentException("Mot de Passe ne peut pas être null ou  vide");
+            }
         return userRepository.save(user);
     }
 

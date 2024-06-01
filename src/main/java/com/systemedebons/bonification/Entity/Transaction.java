@@ -13,6 +13,7 @@ public class Transaction {
 
     @Id
     private String id;
+    private String UserId;
     private LocalDate date;
     private float montant;
     private String type;

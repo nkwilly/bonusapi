@@ -4,6 +4,7 @@ import com.systemedebons.bonification.Entity.Administrator;
 import com.systemedebons.bonification.Repository.AdministratorRepository;
 import com.systemedebons.bonification.Service.AdminService;
 import io.swagger.annotations.Api;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,14 @@ public class AdminController {
 
 
     @PostMapping
-    public Administrator createAdministrator(@RequestBody Administrator administrator) {
-        return adminService.createAdministrator(administrator);
+    public ResponseEntity<Administrator> createAdministrator( @Valid  @RequestBody Administrator administrator) {
+        try{
+            Administrator  savedAdministrator = adminService.saveAdministrator(administrator);
+
+            return ResponseEntity.ok(savedAdministrator);
+        } catch(IllegalArgumentException e){
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     /**

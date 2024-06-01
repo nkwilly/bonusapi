@@ -4,6 +4,7 @@ package com.systemedebons.bonification.Controller;
 import com.systemedebons.bonification.Entity.User;
 import com.systemedebons.bonification.Service.UserService;
 import io.swagger.annotations.Api;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +35,14 @@ public class UserController {
 
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.saveUser(user);
+    public ResponseEntity<User> createUser(@Valid  @RequestBody User user) {
+        try {
+            User  saveUser = userService.saveUser(user);
+            return ResponseEntity.ok(saveUser);
+        }catch (IllegalArgumentException e){
 
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
 

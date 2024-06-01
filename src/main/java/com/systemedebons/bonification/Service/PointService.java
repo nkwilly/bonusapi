@@ -24,6 +24,10 @@ public class PointService {
 
     }
 
+    public List<Point> getPointsByUserId(String UserId) {
+        return pointRepository.findByUserId(UserId);
+    }
+
     public Point savePoint(Point point) {
         return pointRepository.save(point);
     }

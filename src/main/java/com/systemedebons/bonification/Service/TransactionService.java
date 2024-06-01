@@ -32,14 +32,16 @@ public class TransactionService {
     public Transaction saveTransaction(Transaction transaction) {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
+
         if(ruleService.estUneTransactionEligible(savedTransaction)) {
 
             int points = ruleService.calculerPoints(savedTransaction);
 
             if (points > 0) {
                 Point point = new Point();
-                point.setUserId(savedTransaction.getId());
+                point.setUserId(savedTransaction.getUserId());
                 point.setNombre(points);
+                point.setId(savedTransaction.getId());
                 point.setDate(savedTransaction.getDate());
                 pointService.savePoint(point);
 

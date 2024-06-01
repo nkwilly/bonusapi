@@ -45,9 +45,8 @@ public class RuleService {
 
     public int calculerPoints(Transaction transaction) {
 
-        int points = 0;
-
         List<Rule> rules = ruleRepository.findAll();
+        int points = 0;
         for (Rule rule : rules) {
             if(transaction.getMontant() >= rule.getMontantMin()){
                 points += rule.getPoints();

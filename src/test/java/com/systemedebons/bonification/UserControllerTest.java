@@ -86,7 +86,27 @@ public class UserControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    public void testForgotPassword() throws Exception {
+        doNothing().when(userService).resetPassword(anyString());
 
+        mockMvc.perform(post("/api/user/forgot-password")
+                        .param("email", "test@example.com"))
+                .andExpect(status().isNoContent());
 
+        verify(userService, times(1)).resetPassword("test@example.com");
+    }
+
+    @Test
+    public void testResetPassword() throws Exception {
+        doNothing().when(userService).updatePassword(anyString(), anyString());
+
+        mockMvc.perform(post("/api/user/reset-password")
+                        .param("token", "valid-token")
+                        .param("newPassword", "newPassword"))
+                .andExpect(status().isNoContent());
+
+        verify(userService, times(1)).updatePassword("valid-token", "newPassword");
+    }
 
 }

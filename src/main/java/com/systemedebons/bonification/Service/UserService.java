@@ -36,6 +36,12 @@ public class UserService {
 
 
     public  User saveUser(User user) {
+
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("L'adresse e-mail est déjà utilisée.");
+        }
+
             if(user.getMotDePasse() != null && !user.getMotDePasse().isEmpty()) {
                 user.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
             } else{
@@ -55,11 +61,16 @@ public class UserService {
 
     public void resetPassword(String email) {
 
-        Optional<User> user = userRepository.findById(email);
+
+        Optional<User> user = userRepository.findByEmail(email);
         if(user.isPresent()) {
             User userSaved = user.get();
             String token = UUID.randomUUID().toString();
+            userSaved.setResetToken(token);
+            userRepository.save(userSaved);
             emailService.sendPasswordResetEmail(userSaved.getEmail(), token);
+        } else {
+            throw new IllegalArgumentException("L'adresse e-mail est introuvable ou non unique.");
         }
     }
 

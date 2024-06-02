@@ -1,8 +1,12 @@
 package com.systemedebons.bonification.Service;
 
 
+import com.systemedebons.bonification.Auth.JwtUtil;
+import com.systemedebons.bonification.Auth.LoginRequest;
+import com.systemedebons.bonification.Auth.LoginResponse;
 import com.systemedebons.bonification.Entity.User;
 import com.systemedebons.bonification.Repository.UserRepository;
+import io.micrometer.observation.ObservationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +26,9 @@ public class UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
     public List<User> getAllUsers() {
@@ -87,4 +94,33 @@ public class UserService {
     }
 
 
+    public Optional<User> updateUser(String id, User user) {
+        Optional<User> existingUser = userRepository.findById(id);
+        if (existingUser.isPresent()) {
+            User updatedUser = existingUser.get();
+            updatedUser.setNom(user.getNom());
+            updatedUser.setPrenom(user.getPrenom());
+            updatedUser.setEmail(user.getEmail());
+            if (user.getMotDePasse() != null && !user.getMotDePasse().isEmpty()) {
+                updatedUser.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+            }
+            userRepository.save(updatedUser);
+            return Optional.of(updatedUser);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+
+    public Optional<LoginResponse> login(LoginRequest loginRequest) {
+        Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(loginRequest.getPassword(), user.getMotDePasse())) {
+                String token = jwtUtil.generateToken(user);
+                return Optional.of(new LoginResponse(token));
+            }
+        }
+        return Optional.empty();
+    }
 }

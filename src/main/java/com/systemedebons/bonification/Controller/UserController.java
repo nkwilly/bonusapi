@@ -2,6 +2,8 @@ package com.systemedebons.bonification.Controller;
 
 
 import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Auth.LoginRequest;
+import com.systemedebons.bonification.Auth.LoginResponse;
 import com.systemedebons.bonification.Service.UserService;
 import io.swagger.annotations.Api;
 import jakarta.validation.Valid;
@@ -77,6 +79,19 @@ public class UserController {
 
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody User user) {
+        return userService.updateUser(id, user)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
 
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        return userService.login(loginRequest)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(401).build());
+    }
 }

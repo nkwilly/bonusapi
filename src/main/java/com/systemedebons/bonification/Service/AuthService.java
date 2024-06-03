@@ -1,7 +1,12 @@
 package com.systemedebons.bonification.Service;
 
+import com.systemedebons.bonification.Auth.JwtUtil;
 import com.systemedebons.bonification.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.systemedebons.bonification.Entity.User;
@@ -10,7 +15,7 @@ import java.util.*;
 
 @Service
 public class AuthService {
-
+/***
 @Autowired
    private UserRepository  userRepository;
 
@@ -28,6 +33,21 @@ public class AuthService {
         return Optional.empty();
     }
 
+***/
 
+@Autowired
+private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    public String login(String username, String password) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
+        return jwtUtil.generateToken(authentication);
+    }
 }

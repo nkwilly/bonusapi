@@ -112,15 +112,15 @@ public class UserService {
     }
 
 
-    public Optional<LoginResponse> login(LoginRequest loginRequest) {
+    /*public Optional<LoginResponse> login(LoginRequest loginRequest) {
         Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (passwordEncoder.matches(loginRequest.getPassword(), user.getMotDePasse())) {
-                String token = jwtUtil.generateToken(user);
+                String token = jwtUtil.generateToken();
                 return Optional.of(new LoginResponse(token));
             }
         }
         return Optional.empty();
-    }
+    }*/
 }

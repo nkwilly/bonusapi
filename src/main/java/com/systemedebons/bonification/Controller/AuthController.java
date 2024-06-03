@@ -14,7 +14,7 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-
+/***
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestParam String email, @RequestParam String password) {
         Optional<User> userOptional = authService.login(email, password);
@@ -22,5 +22,13 @@ public class AuthController {
             return ResponseEntity.ok(userOptional.get());
         }
         return ResponseEntity.status(401).build();
-    }
+    }*/
+
+@PostMapping("/login")
+public ResponseEntity<?> login(@RequestParam String username, @RequestParam String password) {
+    String token = authService.login(username, password);
+    return ResponseEntity.ok(token);
+}
+
+
 }

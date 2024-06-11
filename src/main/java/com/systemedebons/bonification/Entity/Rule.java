@@ -11,6 +11,7 @@ public class Rule {
 
     @Id
     private String id;
+    private String name;
     private String description;
     private float montantMin;
     private int points;

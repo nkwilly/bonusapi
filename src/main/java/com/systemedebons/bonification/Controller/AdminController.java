@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class AdminController {
 
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Administrator> createAdministrator( @Valid  @RequestBody Administrator administrator) {
         try{
             Administrator  savedAdministrator = adminService.saveAdministrator(administrator);
@@ -47,7 +49,8 @@ public class AdminController {
     }**/
 
 
-    @GetMapping
+    @GetMapping("users")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Administrator> getAllAdministrators() {
         return adminService.getAdmins();
     }
@@ -55,6 +58,7 @@ public class AdminController {
 
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Administrator> getAdministrateurById(@PathVariable String id) {
         Optional<Administrator> administrator = adminService.getAdministrator(id);
         return administrator.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -62,6 +66,7 @@ public class AdminController {
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Administrator> updateAdministrator(@PathVariable String id, @RequestBody Administrator updateAdministrator) {
 
         Optional<Administrator> administratorOptional = administratorRepository.findById(id);
@@ -87,14 +92,11 @@ public class AdminController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAdministrateur(@PathVariable String id) {
         adminService.deleteAdministrator(id);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
 
 
 

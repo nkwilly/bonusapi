@@ -6,6 +6,7 @@ import com.systemedebons.bonification.Service.PointService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,27 +22,32 @@ public class PointController {
     private PointService pointService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Point> getAllPoints() {
         return pointService.getAllPoints();
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Point> getPointById(@PathVariable String id) {
         Optional<Point> point = pointService.getPointById(id);
         return point.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Point createPoint(@RequestBody Point point) {
         return pointService.savePoint(point);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletePoint(@PathVariable String id) {
         pointService.deletePoint(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/Solde/{UserId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Integer> getSoldePoint(@PathVariable String UserId) {
 
         int solde = pointService.getSoldePoints(UserId);
@@ -50,6 +56,7 @@ public class PointController {
 
     }
     @GetMapping("/user/{UserId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public List<Point> getPointsByUtilisateurId(@PathVariable String UserId) {
         return pointService.getPointsByUserId(UserId);
     }

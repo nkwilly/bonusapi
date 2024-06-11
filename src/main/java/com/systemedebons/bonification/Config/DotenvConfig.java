@@ -1,4 +1,4 @@
-package com.systemedebons.bonification;
+package com.systemedebons.bonification.Config;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.annotation.PostConstruct;

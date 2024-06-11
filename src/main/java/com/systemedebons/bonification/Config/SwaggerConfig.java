@@ -1,4 +1,4 @@
-package com.systemedebons.bonification;
+package com.systemedebons.bonification.Config;
 
 
 import io.swagger.v3.oas.models.OpenAPI;

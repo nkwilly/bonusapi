@@ -1,12 +1,9 @@
 package com.systemedebons.bonification.Service;
 
 
-import com.systemedebons.bonification.Auth.JwtUtil;
-import com.systemedebons.bonification.Auth.LoginRequest;
-import com.systemedebons.bonification.Auth.LoginResponse;
+import com.systemedebons.bonification.Security.Jwt.JwtUtils;
 import com.systemedebons.bonification.Entity.User;
 import com.systemedebons.bonification.Repository.UserRepository;
-import io.micrometer.observation.ObservationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,7 +25,7 @@ public class UserService {
     private EmailService emailService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtUtils jwtUtils;
 
 
     public List<User> getAllUsers() {
@@ -49,8 +46,8 @@ public class UserService {
             throw new IllegalArgumentException("L'adresse e-mail est déjà utilisée.");
         }
 
-            if(user.getMotDePasse() != null && !user.getMotDePasse().isEmpty()) {
-                user.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+            if(user.getPassword() != null && !user.getPassword().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
             } else{
                 throw new IllegalArgumentException("Mot de Passe ne peut pas être null ou  vide");
             }
@@ -85,7 +82,7 @@ public class UserService {
         Optional<User> userOptional = userRepository.findByResetToken(token);
         if(userOptional.isPresent()) {
             User user = userOptional.get();
-            user.setMotDePasse(passwordEncoder.encode(newPassword));
+            user.setPassword(passwordEncoder.encode(newPassword));
             user.setResetToken(null);
             userRepository.save(user);
         }else{
@@ -101,8 +98,8 @@ public class UserService {
             updatedUser.setNom(user.getNom());
             updatedUser.setPrenom(user.getPrenom());
             updatedUser.setEmail(user.getEmail());
-            if (user.getMotDePasse() != null && !user.getMotDePasse().isEmpty()) {
-                updatedUser.setMotDePasse(passwordEncoder.encode(user.getMotDePasse()));
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                updatedUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             userRepository.save(updatedUser);
             return Optional.of(updatedUser);
@@ -112,15 +109,4 @@ public class UserService {
     }
 
 
-    /*public Optional<LoginResponse> login(LoginRequest loginRequest) {
-        Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (passwordEncoder.matches(loginRequest.getPassword(), user.getMotDePasse())) {
-                String token = jwtUtil.generateToken();
-                return Optional.of(new LoginResponse(token));
-            }
-        }
-        return Optional.empty();
-    }*/
-}
+  }

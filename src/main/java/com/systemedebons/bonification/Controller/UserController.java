@@ -2,8 +2,7 @@ package com.systemedebons.bonification.Controller;
 
 
 import com.systemedebons.bonification.Entity.User;
-import com.systemedebons.bonification.Auth.LoginRequest;
-import com.systemedebons.bonification.Auth.LoginResponse;
+import com.systemedebons.bonification.payload.request.LoginRequest;
 import com.systemedebons.bonification.Service.UserService;
 import io.swagger.annotations.Api;
 import jakarta.validation.Valid;

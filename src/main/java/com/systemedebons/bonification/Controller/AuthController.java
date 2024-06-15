@@ -18,6 +18,7 @@ import com.systemedebons.bonification.payload.request.LogoutRequest;
 import com.systemedebons.bonification.payload.request.SignupRequest;
 import com.systemedebons.bonification.payload.response.JwtResponse;
 import com.systemedebons.bonification.payload.response.MessageResponse;
+import com.systemedebons.bonification.payload.response.TokenRefreshResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -119,7 +120,7 @@ public class AuthController {
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+            Role userRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
         } else {
@@ -138,7 +139,7 @@ public class AuthController {
 
                         break;
                     default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                        Role userRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(userRole);
                 }
@@ -155,7 +156,7 @@ public class AuthController {
 
 
 
-    @PostMapping("/refresh-token")
+ /**   @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         String requestToken = request.getRefreshToken();
 
@@ -189,7 +190,24 @@ public class AuthController {
                 roles
         ));
     }
+**/
 
+
+
+ @PostMapping("/refreshtoken")
+ public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest request) {
+     String requestRefreshToken = request.getRefreshToken();
+
+     return refreshTokenService.findByToken(requestRefreshToken)
+             .map(refreshTokenService::verifyExpiration)
+             .map(RefreshToken::getUserId)
+             .map(user -> {
+                 String token = jwtUtils.generateJwtTokenFromUserId(user);
+                 return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+             })
+             .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                     "Refresh token is not in database!"));
+ }
 
     @DeleteMapping("/signout")
     public ResponseEntity<?> logoutUser(@Valid @RequestBody LogoutRequest logoutRequest) {
@@ -202,15 +220,17 @@ public class AuthController {
         }
 
         Optional<RefreshToken> optionalRefreshToken = refreshTokenService.findByToken(requestToken);
-        if (optionalRefreshToken.isEmpty()) {
+        if (!optionalRefreshToken.isPresent()) {
             logger.error("Refresh token not found in database!");
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Refresh token is not in database!"));
         }
 
+        RefreshToken refreshToken = optionalRefreshToken.get();
         logger.info("Deleting refresh token: {}", requestToken);
         refreshTokenService.deleteByToken(requestToken);
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
     }
+
 
 
 

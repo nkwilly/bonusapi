@@ -1,10 +1,16 @@
 package com.systemedebons.bonification.Entity;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.systemedebons.bonification.Security.Deserializer.GrantedAuthorityDeserializer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -18,6 +24,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "utilisateurs")
 public class User implements UserDetails {
 
@@ -47,13 +55,18 @@ public class User implements UserDetails {
 
     private String resetToken;
 
-
-    public User(String username, String nom, String prenom, String email, String password) {
+    @JsonCreator
+    public User(@JsonProperty("username") String username,
+                @JsonProperty("nom") String nom,
+                @JsonProperty("prenom") String prenom,
+                @JsonProperty("email") String email,
+                @JsonProperty("password") String password) {
         this.username = username;
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
         this.password = password;
+
     }
 
 

@@ -17,6 +17,7 @@ import java.util.Optional;
 @Api
 @RestController
 @RequestMapping("/api/administrator")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
 
@@ -41,12 +42,6 @@ public class AdminController {
         }
     }
 
-    /**
-     *@PostMapping("/login")
-    public Administrator login(@RequestParam String username, @RequestParam String password) {
-
-        return adminService.login(username, password);
-    }**/
 
 
     @GetMapping("users")
@@ -100,6 +95,11 @@ public class AdminController {
 
 
 
+    @GetMapping("/protected-data")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getProtectedData() {
+        return ResponseEntity.ok("This is protected data for admins only");
+    }
 
 
 

@@ -4,6 +4,8 @@ package com.systemedebons.bonification.Security.Jwt;
 import com.systemedebons.bonification.Security.Service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.Data;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +17,7 @@ import java.util.Date;
 import java.util.function.Function;
 import io.jsonwebtoken.Jwts;
 
-
+@Data
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
@@ -23,8 +25,13 @@ public class JwtUtils {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Getter
     @Value("${jwt.expiration}")
-    private long jwtExpirationMs;
+    private int jwtExpirationMs;
+
+    @Getter
+    @Value("${jwt.refresh.expiration}")
+    private int jwtRefreshExpirationMs;
 
     private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
@@ -39,6 +46,14 @@ public class JwtUtils {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256) // Utilisation correcte de signWith
+                .compact();
+    }
+    public String generateRefreshToken(String userId) {
+        return Jwts.builder()
+                .setSubject(userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtRefreshExpirationMs))
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
@@ -88,4 +103,13 @@ public class JwtUtils {
 
         return false;
     }
+    public String generateJwtTokenFromUserId(String userId) {
+        return Jwts.builder()
+                .setSubject(userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
 }

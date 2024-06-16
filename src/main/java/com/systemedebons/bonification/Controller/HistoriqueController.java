@@ -1,11 +1,16 @@
 package com.systemedebons.bonification.Controller;
 
 import com.systemedebons.bonification.Entity.Historique;
+import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Repository.HistoriqueRepository;
+import com.systemedebons.bonification.Repository.UserRepository;
 import com.systemedebons.bonification.Service.HistoriqueService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +24,11 @@ public class HistoriqueController {
 
     @Autowired
     private HistoriqueService historiqueService;
+    @Autowired
+    private HistoriqueRepository historiqueRepository;
 
+    @Autowired
+    private UserRepository userRepository;
 
 
     @GetMapping
@@ -43,6 +52,9 @@ public class HistoriqueController {
     }
 
 
+
+
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteHistorique(@PathVariable String id) {
@@ -59,7 +71,14 @@ public class HistoriqueController {
 
     }
 
-
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<Historique>> getHistoriqueByCurrentUser(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        List<Historique> historiques = historiqueRepository.findByUserId(user.getId());
+        return ResponseEntity.ok(historiques);
+    }
 
 
 }

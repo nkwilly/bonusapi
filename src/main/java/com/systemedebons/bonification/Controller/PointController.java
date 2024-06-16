@@ -2,11 +2,15 @@ package com.systemedebons.bonification.Controller;
 
 
 import com.systemedebons.bonification.Entity.Point;
+import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Repository.UserRepository;
 import com.systemedebons.bonification.Service.PointService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +21,8 @@ import java.util.Optional;
 @RequestMapping("/api/points")
 public class PointController {
 
-
+    @Autowired
+    private UserRepository  userRepository;
     @Autowired
     private PointService pointService;
 
@@ -59,6 +64,16 @@ public class PointController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public List<Point> getPointsByUtilisateurId(@PathVariable String UserId) {
         return pointService.getPointsByUserId(UserId);
+    }
+
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Integer> getPointsOfCurrentUser(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        int solde = pointService.getSoldePoints(user.getId());
+        return ResponseEntity.ok(solde);
     }
 
 

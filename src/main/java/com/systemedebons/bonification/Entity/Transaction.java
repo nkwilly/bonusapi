@@ -16,7 +16,7 @@ public class Transaction {
     private String id;
     private float montant;
     private String type;
-    private String statut;
+    private Statuts statut;
     private LocalDate date;
     @DBRef
     private User user;

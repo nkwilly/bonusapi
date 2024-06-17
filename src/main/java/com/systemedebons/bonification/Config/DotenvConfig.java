@@ -29,4 +29,7 @@ public class DotenvConfig {
         System.setProperty("SPRING_DATA_MONGO_URI", dotenv.get("SPRING_DATA_MONGO_URI", "mongodb+srv://momoazangue20:momoazangue20@bonusapi.ju0bi6h.mongodb.net/mongodb"));
     }
 
+
+
+
 }

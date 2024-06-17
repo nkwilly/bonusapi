@@ -26,6 +26,7 @@ public class DotenvConfig {
         System.setProperty("SPRING_MAIL_PORT", dotenv.get("SPRING_MAIL_PORT", "587"));
         System.setProperty("SPRING_MAIL_USERNAME", dotenv.get("SPRING_MAIL_USERNAME", "azanguewill@gmail.com"));
         System.setProperty("SPRING_MAIL_PASSWORD", dotenv.get("SPRING_MAIL_PASSWORD", "joig fabk well fhtg"));
+        System.setProperty("SPRING_DATA_MONGO_URI", dotenv.get("SPRING_DATA_MONGO_URI", "mongodb+srv://momoazangue20:momoazangue20@bonusapi.ju0bi6h.mongodb.net/mongodb"));
     }
 
 }

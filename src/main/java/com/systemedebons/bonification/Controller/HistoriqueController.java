@@ -62,6 +62,13 @@ public class HistoriqueController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/clients/{clientId}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<List<Historique>> getHistoriqueByClientId(@PathVariable String clientId) {
+        List<Historique> historiqueList = historiqueService.getHistoriqueByClientId(clientId);
+        return ResponseEntity.ok(historiqueList);
+    }
+
 
     @GetMapping("/users/{UserId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")

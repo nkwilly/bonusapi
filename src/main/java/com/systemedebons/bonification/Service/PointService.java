@@ -24,8 +24,8 @@ public class PointService {
 
     }
 
-    public List<Point> getPointsByUserId(String UserId) {
-        return pointRepository.findByUserId(UserId);
+    public List<Point> getPointsByClientId(String ClientId) {
+        return pointRepository.findByClientId(ClientId);
     }
 
     public Point savePoint(Point point) {
@@ -36,8 +36,8 @@ public class PointService {
         pointRepository.deleteById(id);
     }
 
-    public int getSoldePoints(String UserId) {
-        List<Point> points = pointRepository.findByUserId(UserId);
+    public int getSoldePoints(String ClientId) {
+        List<Point> points = pointRepository.findByClientId(ClientId);
         return points.stream().mapToInt(Point::getNombre).sum();
     }
 

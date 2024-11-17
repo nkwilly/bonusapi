@@ -31,6 +31,11 @@ public class HistoriqueService {
         historiqueRepository.deleteById(id);
     }
 
+    public List<Historique> getHistoriqueByClientId(String clientId) {
+
+        return historiqueRepository.findByClientId(clientId);
+    }
+
     public List<Historique> getHistoriqueByUserId(String userId) {
 
         return historiqueRepository.findByUserId(userId);

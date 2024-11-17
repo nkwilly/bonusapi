@@ -13,7 +13,7 @@ public class Historique {
     @Id
     private String id;
     @DBRef
-    private User user;
+    private Client client;
     private LocalDate date;
     private String type;
     private int points;

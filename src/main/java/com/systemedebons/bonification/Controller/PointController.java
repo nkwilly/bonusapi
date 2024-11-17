@@ -60,10 +60,10 @@ public class PointController {
         return ResponseEntity.ok(solde);
 
     }
-    @GetMapping("/user/{UserId}")
+    @GetMapping("/user/{ClientId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public List<Point> getPointsByUtilisateurId(@PathVariable String UserId) {
-        return pointService.getPointsByUserId(UserId);
+    public List<Point> getPointsByUtilisateurId(@PathVariable String ClientId) {
+        return pointService.getPointsByClientId(ClientId);
     }
 
 

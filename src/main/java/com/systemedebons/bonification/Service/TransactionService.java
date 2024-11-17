@@ -1,11 +1,11 @@
 package com.systemedebons.bonification.Service;
 
+import com.systemedebons.bonification.Entity.Client;
 import com.systemedebons.bonification.Entity.Historique;
 import com.systemedebons.bonification.Entity.Point;
 import com.systemedebons.bonification.Entity.Transaction;
-import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Repository.ClientRepository;
 import com.systemedebons.bonification.Repository.TransactionRepository;
-import com.systemedebons.bonification.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,11 @@ public class TransactionService {
     @Autowired
     private HistoriqueService historiqueService;
 
+    //@Autowired
+    //private UserRepository userRepository;
+
     @Autowired
-    private UserRepository userRepository;
+    private ClientRepository clientRepository;
 
 
     public List<Transaction> getAllTransactions() {
@@ -44,9 +47,9 @@ public class TransactionService {
     public Transaction saveTransaction(Transaction transaction) {
         // Get the current authenticated user
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<User> userOptional = userRepository.findByUsername(username);
+        Optional<Client> userOptional = clientRepository.findByUsername(username);
         if (userOptional.isPresent()) {
-            transaction.setUser(userOptional.get());
+            transaction.setClient(userOptional.get());
         } else {
             throw new RuntimeException("User not found");
         }
@@ -60,7 +63,7 @@ public class TransactionService {
 
             if (points > 0) {
                 Point point = new Point();
-                point.setUser(savedTransaction.getUser());
+                point.setClient(savedTransaction.getClient());
                 point.setNombre(points);
                 point.setId(savedTransaction.getId());
                 point.setDate(LocalDate.now());
@@ -68,7 +71,7 @@ public class TransactionService {
             }
         }
         Historique historique = new Historique();
-        historique.setUser(savedTransaction.getUser());
+        historique.setClient(savedTransaction.getClient());
         historique.setDate(LocalDate.now());
         historique.setType(savedTransaction.getType());
         historique.setPoints(points);

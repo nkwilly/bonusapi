@@ -10,4 +10,5 @@ import java.util.List;
 public interface HistoriqueRepository extends MongoRepository<Historique, String> {
 
         List<Historique> findByUserId(String userId);
+        List<Historique> findByClientId(String clientId);
 }

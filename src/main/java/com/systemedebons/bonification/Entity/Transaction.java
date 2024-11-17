@@ -19,7 +19,7 @@ public class Transaction {
     private Statuts statut;
     private LocalDate date;
     @DBRef
-    private User user;
+    private Client client;
 
 
 

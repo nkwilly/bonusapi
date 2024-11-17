@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface PointRepository extends MongoRepository<Point, String> {
     List<Point> findByUserId(String userId);
+    List<Point> findByClientId(String clientId);
 }

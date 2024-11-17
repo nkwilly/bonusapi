@@ -9,6 +9,10 @@ public class SignupRequest {
 
     @NotBlank
     @Size(min = 3, max = 20)
+    private String login;
+
+    @NotBlank
+    @Size(min = 3, max = 20)
     private String username;
 
     @NotBlank
@@ -31,6 +35,15 @@ public class SignupRequest {
     private String password;
 
     // Getters and setters...
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
 
     public String getUsername() {
         return username;

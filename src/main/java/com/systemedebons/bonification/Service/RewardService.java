@@ -1,11 +1,11 @@
 package com.systemedebons.bonification.Service;
 
+import com.systemedebons.bonification.Entity.Client;
 import com.systemedebons.bonification.Entity.Point;
 import com.systemedebons.bonification.Entity.Reward;
-import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Repository.ClientRepository;
 import com.systemedebons.bonification.Repository.PointRepository;
 import com.systemedebons.bonification.Repository.RewardRepository;
-import com.systemedebons.bonification.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class RewardService {
     @Autowired
     private PointRepository pointRepository;
     @Autowired
-    private UserRepository userRepository;
+    private ClientRepository clientRepository;
 
     public List<Reward> getAllRewards() {
         return rewardRepository.findAll();
@@ -48,11 +48,11 @@ public class RewardService {
                     .stream().mapToInt(Point::getNombre).sum();
 
             if (solde >= reward.getPoints()) {
-                Optional<User> userOptional = userRepository.findById(userId);
-                if (userOptional.isPresent()) {
-                    User user = userOptional.get();
+                Optional<Client> clientOptional = clientRepository.findById(userId);
+                if (clientOptional.isPresent()) {
+                    Client client = clientOptional.get();
                     Point point = new Point();
-                    point.setUser(user);
+                    point.setClient(client);
                     point.setNombre(-reward.getPoints());
                     point.setDate(LocalDate.now());
                     pointRepository.save(point);

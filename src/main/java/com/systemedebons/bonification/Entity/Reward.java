@@ -16,5 +16,5 @@ public class Reward {
     private String description;
     private int points;
     @DBRef
-    private User user;
+    private Client client;
 }

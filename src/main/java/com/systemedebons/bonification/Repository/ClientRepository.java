@@ -8,11 +8,7 @@ import java.util.*;
 
 @Repository
 public interface ClientRepository extends MongoRepository<Client, String> {
-
-    Optional<Client> findByEmail(String email);
-    Optional<Client> findByResetToken(String token);
-    Optional<Client> findByUsername(String Clientname);
-    Boolean existsByUsername(String Clientname);
-    Boolean existsByEmail(String email);
-
+    Optional<Client> findByClientName(String Clientname);
+    List<Client> findByUserId(String userId);
+    Optional<Client> findByClientNameAndUserId(String clientName, String userId);
 }

@@ -19,7 +19,7 @@ import com.systemedebons.bonification.payload.request.SignupRequest;
 import com.systemedebons.bonification.payload.response.JwtResponse;
 import com.systemedebons.bonification.payload.response.MessageResponse;
 import com.systemedebons.bonification.payload.response.TokenRefreshResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,44 +42,35 @@ import org.slf4j.LoggerFactory;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-
-    @Autowired
     AuthenticationManager authenticationManager;
-
-    @Autowired
+    
     UserRepository userRepository;
-
-    @Autowired
+    
     RoleRepository roleRepository;
-
-    @Autowired
+    
     PasswordEncoder encoder;
-
-    @Autowired
+    
     JwtUtils jwtUtils;
-
-    @Autowired
+    
     private RefreshTokenService refreshTokenService;
 
-    @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
-    @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
-
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
+        logger.debug("Hello world");
+        Authentication authentication;
+        authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getLogin(), loginRequest.getPassword()));
+        logger.debug("Hello world");
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(authentication.getName());
@@ -87,7 +78,6 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(),
                 userDetails.getId(),
                 userDetails.getUsername(),
@@ -97,7 +87,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+        if (userRepository.existsByLogin(signUpRequest.getLogin())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Username is already taken!"));
@@ -114,45 +104,19 @@ public class AuthController {
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
-        Set<String> strRoles = signUpRequest.getRoles();
         Set<Role> roles = new HashSet<>();
 
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "mod":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
-        }
+        Role role = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> {
+            logger.error("Role not found: {}", ERole.ROLE_USER);
+            return new RuntimeException("Internal Error");
+        });
+        roles.add(role);
 
         user.setRoles(roles);
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
-
-
-
-
 
  /**   @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
@@ -189,9 +153,7 @@ public class AuthController {
         ));
     }
 **/
-
-
-
+ 
  @PostMapping("/refreshtoken")
  public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest request) {
      String requestRefreshToken = request.getRefreshToken();
@@ -211,7 +173,6 @@ public class AuthController {
     public ResponseEntity<?> logoutUser(@Valid @RequestBody LogoutRequest logoutRequest) {
         String requestToken = logoutRequest.getRefreshToken();
         logger.info("Received logout request with refresh token: {}", requestToken);
-
         if (requestToken == null || requestToken.isEmpty()) {
             logger.error("Refresh token is missing!");
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Refresh token is missing!"));
@@ -228,9 +189,4 @@ public class AuthController {
         refreshTokenService.deleteByToken(requestToken);
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
     }
-
-
-
-
-
 }

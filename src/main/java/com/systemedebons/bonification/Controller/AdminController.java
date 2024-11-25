@@ -19,8 +19,6 @@ import java.util.Optional;
 @RequestMapping("/api/administrator")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
-
-
     @Autowired
     private AdminService adminService;
     @Autowired
@@ -30,7 +28,7 @@ public class AdminController {
     private PasswordEncoder passwordEncoder;
 
 
-    @PostMapping
+    @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Administrator> createAdministrator( @Valid  @RequestBody Administrator administrator) {
         try{

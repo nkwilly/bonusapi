@@ -12,11 +12,14 @@ import java.time.LocalDate;
 public class Historique {
     @Id
     private String id;
+
     @DBRef
     private Client client;
-    private LocalDate date;
-    private String type;
+
+    @DBRef
+    private Transaction transaction;
+
     private int points;
-    private  float montantTransaction;
+
     private String description;
 }

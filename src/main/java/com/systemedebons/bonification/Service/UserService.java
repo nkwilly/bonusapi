@@ -4,6 +4,7 @@ package com.systemedebons.bonification.Service;
 import com.systemedebons.bonification.Security.Jwt.JwtUtils;
 import com.systemedebons.bonification.Entity.User;
 import com.systemedebons.bonification.Repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,18 +14,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
+    
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
+    
     private EmailService emailService;
-
-    @Autowired
+    
     private JwtUtils jwtUtils;
 
 

@@ -3,6 +3,7 @@ package com.systemedebons.bonification;
 import com.systemedebons.bonification.Controller.TransactionController;
 import com.systemedebons.bonification.Entity.Transaction;
 import com.systemedebons.bonification.Service.TransactionService;
+import com.systemedebons.bonification.payload.dto.TransactionDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -65,7 +66,7 @@ public class TransactionControllerTest {
     void testCreateTransaction() throws Exception {
         Transaction transaction = new Transaction();
         transaction.setId("1");
-        when(transactionService.saveTransaction(any(Transaction.class))).thenReturn(transaction);
+        when(transactionService.saveTransaction(any(TransactionDTO.class))).thenReturn(transaction);
 
         mockMvc.perform(post("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON)

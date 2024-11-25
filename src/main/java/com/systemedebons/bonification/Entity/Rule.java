@@ -12,9 +12,13 @@ public class Rule {
 
     @Id
     private String id;
+
     private String description;
-    private float montantMin;
+
+    private double montantMin;
+
     private int points;
-    private String createdBy;  // ID de l'utilisateur
-    private String createdByName;  // Nom de l'utilisateur
+
+    @DBRef
+    private User user;
 }

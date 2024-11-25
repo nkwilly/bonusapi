@@ -15,12 +15,16 @@ public class Administrator {
 
  @NotBlank(message = "Le nom est obligatoire")
   private String nom;
+
  @NotBlank(message = "Le prénom est obligatoire")
   private String prenom;
+
   private String  username;
  @Email(message = "Email doit être valide")
  @NotBlank(message = "L'email nom est obligatoire")
+
   private String  email;
+
  @NotBlank(message = "Le mot de passe est obligatoire")
   private String  motDePasse;
 

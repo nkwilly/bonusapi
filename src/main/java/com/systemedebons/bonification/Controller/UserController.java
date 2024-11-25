@@ -6,6 +6,7 @@ import com.systemedebons.bonification.payload.request.LoginRequest;
 import com.systemedebons.bonification.Service.UserService;
 import io.swagger.annotations.Api;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,25 +17,21 @@ import java.util.Optional;
 
 @Api(value = "Utilisateur Management System", description = "Operations pertaining to user in User Management System")
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/user")
 public class UserController {
 
-    @Autowired
     private UserService userService;
 
     @GetMapping("list")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
+    public List<User> getAllUsers() {return userService.getAllUsers();}
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> getUserById(@PathVariable String id) {
-
         Optional<User> user = userService.getUserById(id);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-
     }
 
 
@@ -45,7 +42,6 @@ public class UserController {
             User  saveUser = userService.saveUser(user);
             return ResponseEntity.ok(saveUser);
         }catch (IllegalArgumentException e){
-
             return ResponseEntity.badRequest().body(null);
         }
     }
@@ -62,7 +58,6 @@ public class UserController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@RequestParam String email) {
-
         try {
             userService.resetPassword(email);
             return ResponseEntity.noContent().build();
@@ -73,14 +68,12 @@ public class UserController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@RequestParam String token , @RequestParam String newPassword) {
-    try{
-        userService.updatePassword(token, newPassword);
-        return ResponseEntity.noContent().build();
-    }catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+        try{
+            userService.updatePassword(token, newPassword);
+            return ResponseEntity.noContent().build();
+        }catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().build();
         }
-
-
     }
 
     @PutMapping("/{id}")

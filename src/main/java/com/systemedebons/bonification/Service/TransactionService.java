@@ -1,13 +1,16 @@
 package com.systemedebons.bonification.Service;
 
-import com.systemedebons.bonification.Entity.Client;
-import com.systemedebons.bonification.Entity.Historique;
-import com.systemedebons.bonification.Entity.Point;
-import com.systemedebons.bonification.Entity.Transaction;
+import com.systemedebons.bonification.Entity.*;
 import com.systemedebons.bonification.Repository.ClientRepository;
 import com.systemedebons.bonification.Repository.TransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.systemedebons.bonification.Security.utils.SecurityUtils;
+import com.systemedebons.bonification.Service.utils.Mapper;
+import com.systemedebons.bonification.payload.exception.AccessTransactionException;
+import com.systemedebons.bonification.payload.dto.TransactionDTO;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,47 +18,56 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class TransactionService {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(TransactionService.class);
     private TransactionRepository transactionRepository;
 
-    @Autowired
     private PointService pointService;
 
-    @Autowired
     private RuleService ruleService;
 
-    @Autowired
     private HistoriqueService historiqueService;
 
-    //@Autowired
-    //private UserRepository userRepository;
-
-    @Autowired
     private ClientRepository clientRepository;
 
+    private SecurityUtils securityUtils;
 
+    private Mapper mapper;
+
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+        if (securityUtils.isCurrentUserAdmin())
+            return transactionRepository.findAll();
+        return transactionRepository.findByUserId(securityUtils.getCurrentUser().map(User::getId).orElseThrow(() -> new RuntimeException("User not logged in")));
     }
 
-    public Optional<Transaction> getTransactionById(String id) {
-        return transactionRepository.findById(id);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<Transaction> getAllTransactionsByUser(String userId){
+        return transactionRepository.findByUserId(userId);
     }
 
-    public Transaction saveTransaction(Transaction transaction) {
-        // Get the current authenticated user
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Client> userOptional = clientRepository.findByUsername(username);
-        if (userOptional.isPresent()) {
-            transaction.setClient(userOptional.get());
-        } else {
-            throw new RuntimeException("User not found");
-        }
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    public Optional<Transaction> getTransactionById(String transactionId) {
+        Optional<Transaction> transaction = transactionRepository.findById(transactionId);
+        if (transaction.isEmpty())
+            return Optional.empty();
+        if (securityUtils.isClientOfCurrentUser(transaction.get().getClient().getId()) || securityUtils.isCurrentUserAdmin() )
+            return transaction;
+        throw new AccessTransactionException();
+    }
+
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    public Transaction saveTransaction(TransactionDTO transactionDTO) {
+        log.debug("bonjour le monde {}", transactionDTO);
+        Transaction transaction = mapper.toTransaction(transactionDTO);
+        if (!securityUtils.isClientOfCurrentUser(transaction.getClient().getId()) && !securityUtils.isCurrentUserAdmin())
+            throw new AccessTransactionException();
 
         transaction.setDate(LocalDate.now()); // Set current date
         Transaction savedTransaction = transactionRepository.save(transaction);
+
         int points = 0;
 
         if (ruleService.estUneTransactionEligible(savedTransaction)) {
@@ -72,10 +84,8 @@ public class TransactionService {
         }
         Historique historique = new Historique();
         historique.setClient(savedTransaction.getClient());
-        historique.setDate(LocalDate.now());
-        historique.setType(savedTransaction.getType());
         historique.setPoints(points);
-        historique.setMontantTransaction(savedTransaction.getMontant());
+        historique.setTransaction(savedTransaction);
         historique.setDescription("Transaction " + (points > 0 ? "éligible" : "non éligible") + " pour des points.");
 
         historiqueService.saveHistorique(historique);
@@ -83,13 +93,11 @@ public class TransactionService {
         return savedTransaction;
     }
 
-    public void deleteTransaction(String id) {
-        transactionRepository.deleteById(id);
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    public void deleteTransaction(String transcationId) {
+        Transaction transaction = transactionRepository.findById(transcationId).orElse(new Transaction());
+        if (securityUtils.isClientOfCurrentUser(transaction.getClient().getId()) || securityUtils.isCurrentUserAdmin())
+            transactionRepository.deleteById(transcationId);
+        throw new AccessTransactionException();
     }
-
-
-
-
-
-
 }

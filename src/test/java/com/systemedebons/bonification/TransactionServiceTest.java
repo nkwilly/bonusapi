@@ -3,6 +3,7 @@ package com.systemedebons.bonification;
 import com.systemedebons.bonification.Entity.Transaction;
 import com.systemedebons.bonification.Repository.TransactionRepository;
 import com.systemedebons.bonification.Service.TransactionService;
+import com.systemedebons.bonification.payload.dto.TransactionDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -44,9 +45,10 @@ public class TransactionServiceTest {
     @Test
     void testSaveTransaction() {
         Transaction transaction = new Transaction();
+        TransactionDTO dto = new TransactionDTO();
         when(transactionRepository.save(any(Transaction.class))).thenReturn(transaction);
 
-        Transaction savedTransaction = transactionService.saveTransaction(transaction);
+        Transaction savedTransaction = transactionService.saveTransaction(dto);
         assertNotNull(savedTransaction);
         verify(transactionRepository, times(1)).save(transaction);
     }

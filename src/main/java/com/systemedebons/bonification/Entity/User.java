@@ -50,13 +50,5 @@ public class User {
         this.login = login;
         this.email = email;
         this.password = password;
-
     }
-
-
-    //@Override
-    //public String getLogin() {
-    //    return login;
-    //}
-
 }

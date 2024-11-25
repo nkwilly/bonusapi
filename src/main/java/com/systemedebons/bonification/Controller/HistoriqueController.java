@@ -6,7 +6,10 @@ import com.systemedebons.bonification.Repository.HistoriqueRepository;
 import com.systemedebons.bonification.Repository.UserRepository;
 import com.systemedebons.bonification.Service.HistoriqueService;
 import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,52 +21,49 @@ import java.util.Optional;
 
 @Api
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/historiques")
 public class HistoriqueController {
 
-
-    @Autowired
     private HistoriqueService historiqueService;
-    @Autowired
+
     private HistoriqueRepository historiqueRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
-
     @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public List<Historique> getAllHistoriques() {
         return historiqueService.getAllHistoriques();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Historique> getHistoriqueById(@PathVariable String id) {
         Optional<Historique> historique = historiqueService.getHistoriqueById(id);
         return historique.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Historique>> getHistoriquesByClients(@PathVariable String userId) {
+        return new ResponseEntity<>(historiqueService.getHistoriquesByUserId(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<Historique>> getHistoriquesByUser() {
+        return new ResponseEntity<>(historiqueService.getHistoriquesByUserId(), HttpStatus.OK);
+    }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public Historique createHistorique(@RequestBody Historique historique) {
         return historiqueService.saveHistorique(historique);
     }
 
-
-
-
-
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteHistorique(@PathVariable String id) {
         historiqueService.deleteHistorique(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/clients/{clientId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<List<Historique>> getHistoriqueByClientId(@PathVariable String clientId) {
         List<Historique> historiqueList = historiqueService.getHistoriqueByClientId(clientId);
         return ResponseEntity.ok(historiqueList);
@@ -73,19 +73,8 @@ public class HistoriqueController {
     @GetMapping("/users/{UserId}")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<List<Historique>> getHistoriqueByUserId(@PathVariable String UserId) {
-        List<Historique> historiqueList = historiqueService.getHistoriqueByUserId(UserId);
+        List<Historique> historiqueList = historiqueService.getHistoriquesByUserId(UserId);
         return ResponseEntity.ok(historiqueList);
 
     }
-
-    @GetMapping("/me")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<Historique>> getHistoriqueByCurrentUser(Authentication authentication) {
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        List<Historique> historiques = historiqueRepository.findByUserId(user.getId());
-        return ResponseEntity.ok(historiques);
-    }
-
-
 }

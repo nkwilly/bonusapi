@@ -1,6 +1,5 @@
 package com.systemedebons.bonification.Entity;
 
-
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -15,14 +14,12 @@ public class Transaction {
     @Id
     private String id;
 
-    private float montant;
+    private double amount;
 
-    private String type;
-
-    private Statuts statut;
-
-    private LocalDate date;
+    private Statuts status;
 
     @DBRef
     private Client client;
+
+    private Boolean isDebit; // Si True alors on intègre le calcul des points dans la facturation et il y a donc débit de points.
 }

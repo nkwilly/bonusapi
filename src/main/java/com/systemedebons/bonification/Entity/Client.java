@@ -2,6 +2,7 @@ package com.systemedebons.bonification.Entity;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -18,7 +19,9 @@ public class Client {
     @Id
     private String id;
 
-    private String clientName;
+    @Indexed(unique = true)
+    private String login;
 
-    private String userId;
+    @DBRef
+    private User user;
 }

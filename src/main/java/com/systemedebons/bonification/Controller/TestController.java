@@ -76,15 +76,16 @@ public class TestController {
 
     @GetMapping("/info")
     public ResponseEntity<User> getUserInfo() {
-        User currentUser = securityUtils.getCurrentUser().orElseThrow(() -> {
-            log.error("User not logged in");
-            return new EntityNotFound("User not logged in");
-        });
-        return ResponseEntity.ok(currentUser);
+        return securityUtils.getCurrentUser().map(ResponseEntity::ok).orElse(ResponseEntity.ok(new User()));
     }
 
     @GetMapping("/is_admin")
     public ResponseEntity<Boolean> isAdmin() {
         return ResponseEntity.ok(securityUtils.isCurrentUserAdmin());
+    }
+
+    @GetMapping("/role/test")
+    public ResponseEntity<Boolean> getUserRoleTest() {
+        return ResponseEntity.ok(securityUtils.isAuthenticated());
     }
 }

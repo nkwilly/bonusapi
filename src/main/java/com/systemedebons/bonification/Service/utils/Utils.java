@@ -17,12 +17,12 @@ public class Utils {
     private ClientRepository clientRepository;
 
     public boolean clientForUser(User user, Client client) {
-        return client.getUserId().equals(user.getId());
+        return client.getUser().getId().equals(user.getId());
     }
 
-    public boolean clientForUser(String username, String clientId) {
+    public boolean clientForUser(String username, String clientLogin) {
         User user = userRepository.findByLogin(username).orElse(new User());
-        Client client = clientRepository.findById(clientId).orElse(new Client());
+        Client client = clientRepository.findById(clientLogin).orElse(new Client());
         return clientForUser(user, client);
     }
 

@@ -5,7 +5,6 @@ import com.systemedebons.bonification.Entity.User;
 import com.systemedebons.bonification.Repository.ClientRepository;
 import com.systemedebons.bonification.Repository.UserRepository;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -15,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,10 +55,10 @@ public class SecurityUtils {
         return userRepository.findByLogin(username);
     }
 
-    public boolean isClientOfCurrentUser(String clientId) {
-        Client client = clientRepository.findById(clientId).orElse(new Client());
+    public boolean isClientOfCurrentUser(String clientLogin) {
+        Client client = clientRepository.findByLogin(clientLogin).orElse(new Client());
         User user = getCurrentUser().orElse(new User());
-        return user.getId().equals(client.getUserId());
+        return user.getId().equals(client.getUser().getId());
     }
 
     public boolean isUserOfCurrentUser(String userId) {

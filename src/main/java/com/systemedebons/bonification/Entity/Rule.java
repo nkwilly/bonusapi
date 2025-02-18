@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document(collection = "Rules")
+@Document(collection = "rules")
 public class Rule {
 
     @Id
@@ -15,9 +15,13 @@ public class Rule {
 
     private String description;
 
-    private double montantMin;
+    private double amountMin;
 
-    private int points;
+    private Integer points;
+
+    private Integer minDaysForIrregularClients;
+
+    private Boolean alwaysCredit;
 
     @DBRef
     private User user;

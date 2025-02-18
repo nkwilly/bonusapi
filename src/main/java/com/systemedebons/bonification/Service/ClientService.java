@@ -27,7 +27,7 @@ public class ClientService {
 
     private SecurityUtils securityUtils;
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public List<Client> getAllClients() {
         if (securityUtils.isCurrentUserAdmin())
             return clientRepository.findAll();
@@ -46,26 +46,24 @@ public class ClientService {
         return clientRepository.findByUserId(user.getId());
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public Optional<Client> getClientById(String clientId) {
-        if (securityUtils.isClientOfCurrentUser(clientId) || securityUtils.isCurrentUserAdmin())
-            return clientRepository.findById(clientId);
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public Optional<Client> getClientById(String clientLogin) {
+        if (securityUtils.isClientOfCurrentUser(clientLogin) || securityUtils.isCurrentUserAdmin())
+            return clientRepository.findById(clientLogin);
         throw new AccessClientException();
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public Optional<Client> createClient(String clientName) {
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public Optional<Client> createClient(String clientLogin) {
         Client client = new Client();
-        client.setClientName(clientName);
-        String userId = securityUtils.getCurrentUser().orElseThrow(UsernameNotFoundException::new).getId();
-        client.setUserId(userId);
-        if (clientRepository.findByClientNameAndUserId(clientName, userId).isEmpty())
-            return Optional.of(clientRepository.save(client));
-        throw new DuplicateException("clientName : " + clientName + ", for userId : " + userId);
+        client.setLogin(clientLogin);
+        User user = securityUtils.getCurrentUser().orElseThrow((UsernameNotFoundException::new));
+        client.setUser(user);
+        return Optional.of(clientRepository.save(client));
     }
 
     /*
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public  Client saveClient(Client client) {
         if (!securityUtils.isClientOfCurrentUser(client.getId()) && !securityUtils.isCurrentUserAdmin())
             throw new AccessClientException();
@@ -81,21 +79,21 @@ public class ClientService {
     }
      */
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public void delete(String clientId) {
-        if (securityUtils.isClientOfCurrentUser(clientId) || securityUtils.isCurrentUserAdmin())
-            clientRepository.deleteById(clientId);
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public void delete(String clientLogin) {
+        if (securityUtils.isClientOfCurrentUser(clientLogin) || securityUtils.isCurrentUserAdmin())
+            clientRepository.deleteById(clientLogin);
         else throw new AccessClientException();
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public Optional<Client> update(Client client) {
         if (!securityUtils.isClientOfCurrentUser(client.getId()) && !securityUtils.isCurrentUserAdmin())
             throw new AccessClientException();
         Optional<Client> existingClient = clientRepository.findById(client.getId());
         if (existingClient.isPresent()) {
             Client updatedClient = existingClient.get();
-            updatedClient.setClientName(client.getClientName());
+            updatedClient.setLogin(client.getLogin());
             clientRepository.save(updatedClient);
             return Optional.of(updatedClient);
         }

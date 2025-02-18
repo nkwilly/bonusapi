@@ -4,6 +4,7 @@ package com.systemedebons.bonification.Service;
 import com.systemedebons.bonification.Security.Jwt.JwtUtils;
 import com.systemedebons.bonification.Entity.User;
 import com.systemedebons.bonification.Repository.UserRepository;
+import com.systemedebons.bonification.Security.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,9 +23,10 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     
     private EmailService emailService;
+
+    private SecurityUtils securityUtils;
     
     private JwtUtils jwtUtils;
-
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -36,23 +38,17 @@ public class UserService {
 
     }
 
-
     public  User saveUser(User user) {
-
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
             throw new IllegalArgumentException("L'adresse e-mail est déjà utilisée.");
         }
-
             if(user.getPassword() != null && !user.getPassword().isEmpty()) {
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
             } else{
                 throw new IllegalArgumentException("Mot de Passe ne peut pas être null ou  vide");
             }
-            User userSaved = userRepository.save(user);
-            emailService.sendWelcomeEmail(user.getEmail());
-
-        return userSaved;
+        return userRepository.save(user);
     }
 
 
@@ -60,10 +56,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-
     public void resetPassword(String email) {
-
-
         Optional<User> user = userRepository.findByEmail(email);
         if(user.isPresent()) {
             User userSaved = user.get();
@@ -88,7 +81,6 @@ public class UserService {
         }
     }
 
-
     public Optional<User> updateUser(String id, User user) {
         Optional<User> existingUser = userRepository.findById(id);
         if (existingUser.isPresent()) {
@@ -103,6 +95,4 @@ public class UserService {
             return Optional.empty();
         }
     }
-
-
   }

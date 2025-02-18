@@ -1,14 +1,15 @@
 package com.systemedebons.bonification.Controller;
 
 import com.systemedebons.bonification.Entity.Reward;
+import com.systemedebons.bonification.Entity.Rewards;
+import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Repository.RewardRepository;
+import com.systemedebons.bonification.Security.utils.SecurityUtils;
 import com.systemedebons.bonification.Service.RewardService;
 import com.systemedebons.bonification.payload.dto.RewardDTO;
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,17 +21,16 @@ import java.util.Optional;
 @RequestMapping("api/rewards")
 public class RewardController {
 
-    RewardService rewardService;
+    private final RewardRepository rewardRepository;
+    private RewardService rewardService;
 
-    //obtenir la liste des  récompenses
+    private SecurityUtils securityUtils;
+
+
+
     @GetMapping("reward-list")
     public ResponseEntity<List<Reward>> getRewards() {
-        return ResponseEntity.ok(rewardService.getAllRewards());
-    }
-
-    @GetMapping("reward-user")
-    public ResponseEntity<List<Reward>> getRewardsByUserId(@RequestParam("userId") String userId) {
-        return ResponseEntity.ok(rewardService.getAllRewardsByUserId(userId));
+        return ResponseEntity.ok(rewardService.getAllReward());
     }
 
     @GetMapping("/{id}")
@@ -39,7 +39,7 @@ public class RewardController {
         return reward.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("create-reward")
+    @PostMapping
     public Reward createReward(@RequestBody RewardDTO reward) {
         return rewardService.saveReward(reward);
     }
@@ -48,14 +48,13 @@ public class RewardController {
     public ResponseEntity<Void> deleteReward(@PathVariable String id) {
         rewardService.deleteReward(id);
         return ResponseEntity.noContent().build();
+
     }
 
-    @PostMapping("/echanger/{UserId}/{id}")
-    public ResponseEntity<Void> exchangesPoints(@PathVariable String UserId, @PathVariable String id) {
-        boolean success = rewardService.exchangePoints(UserId, id);
-        if (success)
-            return ResponseEntity.ok().build();
-        else
-            return ResponseEntity.badRequest().build();
+    @PostMapping("/exchange-rewards/{id}")
+    public ResponseEntity<Reward> exchangesPoints(@PathVariable String id) {
+        String userId = securityUtils.getCurrentUser().orElseThrow().getId();
+        Optional<Reward> reward = rewardService.exchangePoints(userId, id);
+        return reward.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

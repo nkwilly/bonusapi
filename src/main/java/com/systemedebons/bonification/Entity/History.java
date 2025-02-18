@@ -2,19 +2,22 @@ package com.systemedebons.bonification.Entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
-@Document(collection = "rewards")
-public class Reward {
+@Document(collection = "history")
+public class History {
     @Id
-    private String  id;
+    private String id;
 
-    private Double value;
+    private Integer points;
 
+    private LocalDate date;
+    
     @DBRef
-    @Indexed(unique = true)
-    private User user;
+    private Transaction transaction;
 }

@@ -8,7 +8,8 @@ import java.util.*;
 
 @Repository
 public interface ClientRepository extends MongoRepository<Client, String> {
-    Optional<Client> findByClientName(String Clientname);
+    Optional<Client> findByLogin(String login);
     List<Client> findByUserId(String userId);
-    Optional<Client> findByClientNameAndUserId(String clientName, String userId);
+    void deleteByLogin(String login);
+   // Optional<Client> findByLoginAndUserId(String clientLogin, String userId);
 }

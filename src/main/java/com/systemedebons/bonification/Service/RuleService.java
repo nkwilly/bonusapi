@@ -1,15 +1,11 @@
 package com.systemedebons.bonification.Service;
 
-import com.systemedebons.bonification.Entity.Rule;
-import com.systemedebons.bonification.Entity.Transaction;
-import com.systemedebons.bonification.Entity.User;
-import com.systemedebons.bonification.Repository.RuleRepository;
-import com.systemedebons.bonification.Repository.UserRepository;
+import com.systemedebons.bonification.Entity.*;
+import com.systemedebons.bonification.Repository.*;
 import com.systemedebons.bonification.Security.utils.SecurityUtils;
 import com.systemedebons.bonification.payload.exception.AccessRulesException;
 import com.systemedebons.bonification.payload.exception.EntityNotFound;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -25,13 +20,16 @@ public class RuleService {
 
     private static final Logger log = LoggerFactory.getLogger(RuleService.class);
 
-    private RuleRepository ruleRepository;
+    private final RuleRepository ruleRepository;
 
-    private UserRepository userRepository;
+    private final  UserRepository userRepository;
 
-    private SecurityUtils securityUtils;
+    private final RewardRepository rewardRepository;
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    private final SecurityUtils securityUtils;
+    private final BaseRuleRepository baseRuleRepository;
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public List<Rule> getAllRules() {
         if (securityUtils.isCurrentUserAdmin())
             return ruleRepository.findAll();
@@ -39,7 +37,7 @@ public class RuleService {
         return ruleRepository.findRuleByUser(currentUser);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public Optional<Rule> getRuleById(String  ruleId) {
         Rule rule = ruleRepository.findById(ruleId).orElseThrow(() -> new EntityNotFound(ruleId));
         if (securityUtils.isUserOfCurrentUser(rule.getUser().getId()) || securityUtils.isCurrentUserAdmin())
@@ -49,48 +47,94 @@ public class RuleService {
     
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<Rule> getRulesByUserId(String userId) {
-        log.debug("Bon je suis là!!!");
-        return ruleRepository.findRuleByUser(userRepository.findById(userId).orElseThrow(() -> new EntityNotFound("User Not Found")));
+        return ruleRepository
+                .findRuleByUser(
+                        userRepository.findById(userId)
+                                .orElseThrow(() -> new EntityNotFound("User Not Found")));
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public Rule saveRule(Rule rule) {
+        if (rule.getUser() == null)
+            rule.setUser(securityUtils.getCurrentUser().orElseThrow());
+        log.info("user = {}", rule.getUser());
         if (securityUtils.isUserOfCurrentUser(rule.getUser().getId()) || securityUtils.isCurrentUserAdmin())
             return ruleRepository.save(rule);
         throw new AccessRulesException();
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public void deleteRule(String ruleId) {
         Rule rule = ruleRepository.findById(ruleId).orElseThrow(() -> new EntityNotFound(ruleId));
         if (securityUtils.isUserOfCurrentUser(rule.getUser().getId()) || securityUtils.isCurrentUserAdmin())
             ruleRepository.deleteById(ruleId);
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public boolean estUneTransactionEligible(Transaction transaction) {
-        if (!securityUtils.isClientOfCurrentUser(transaction.getClient().getId()) && !securityUtils.isCurrentUserAdmin())
+        if (!securityUtils.isClientOfCurrentUser(transaction.getClient().getLogin()) && !securityUtils.isCurrentUserAdmin())
             throw new AccessRulesException();
         User currentUser = securityUtils.getCurrentUser().orElseThrow(() -> new EntityNotFound("current user"));
         List<Rule> rules = ruleRepository.findRuleByUser(currentUser);
-         return !rules.stream().map(Rule::getMontantMin)
-                .filter(montantMin -> transaction.getMontant() >= montantMin)
+         return !rules.stream().map(Rule::getAmountMin)
+                .filter(montantMin -> transaction.getAmount() >= montantMin)
                 .toList()
                 .isEmpty();
     }
 
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public int calculerPoints(Transaction transaction) {
-        if (!securityUtils.isClientOfCurrentUser(transaction.getClient().getId()) && !securityUtils.isCurrentUserAdmin())
+    /**
+     * Compute the number of points in a transaction.
+     * Use amount field of the {@code Transaction} entity.
+     * @param transaction transaction entity
+     * @return number of points generate by the transaction.
+     */
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public int computePoints(Transaction transaction) {
+        if (!securityUtils.isClientOfCurrentUser(transaction.getClient().getLogin()) && !securityUtils.isCurrentUserAdmin())
             throw new AccessRulesException();
         List<Rule> rules = ruleRepository.findRuleByUser(securityUtils.getCurrentUser().orElseThrow(() -> new EntityNotFound("current user")));
-        int points = rules.stream()
-                .map(rule -> transaction.getMontant() >= rule.getMontantMin() ? rule.getPoints() : 0)
+        return rules.stream()
+                .map(rule -> transaction.getAmount() >= rule.getAmountMin() ? rule.getPoints() : 0)
                 .toList()
                 .stream().filter(elt -> elt != 0)
                 .max(Integer::compareTo)
                 .orElseThrow(() -> new RuntimeException("Computation errors"));
-        log.debug("points: {}", points);
-        return points;
+    }
+
+    /**
+     * Compute the number of points generate by certain amount.
+     * @param amount amount.
+     * @return number of points.
+     */
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public int computePoints(double amount) {
+        List<Rule> rules = ruleRepository.findRuleByUser(securityUtils.getCurrentUser().orElseThrow(() -> new EntityNotFound("current user")));
+        return rules.stream()
+                .map(rule -> amount >= rule.getAmountMin() ? rule.getPoints() : 0)
+                .max(Integer::compareTo)
+                .orElseThrow(() -> new RuntimeException("Computation errors"));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public Double getAmountOfPointsForClient(Point point) {
+        Optional<Reward> optionalReward = rewardRepository.findByUserId(point.getClient().getUser().getId());
+        if (optionalReward.isEmpty())
+            throw new RuntimeException("Not Reward defined");
+        Reward reward = optionalReward.get();
+        return point.getNumber() * reward.getValue();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public Double getAmountOfPoints(Integer points) {
+        User currentUser = securityUtils.getCurrentUser().orElseThrow(RuntimeException::new);
+        BaseRule base = baseRuleRepository.findByUser(currentUser);
+        return points * base.getAmount();
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    public BaseRule createBaseRule(BaseRule baseRule) {
+        User currentUser = securityUtils.getCurrentUser().orElseThrow(RuntimeException::new);
+        baseRule.setUser(currentUser);
+        return baseRuleRepository.save(baseRule);
     }
 }

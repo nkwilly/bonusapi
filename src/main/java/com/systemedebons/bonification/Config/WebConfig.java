@@ -12,7 +12,6 @@ public class WebConfig {
 
     @Bean
     public Module javaTimeModule() {
-
         return new JavaTimeModule();
     }
 
@@ -23,6 +22,4 @@ public class WebConfig {
                 .modules(javaTimeModule())
                 .build();
     }
-
-
 }

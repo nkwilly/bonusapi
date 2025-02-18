@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,14 +34,14 @@ public class RuleServiceTests {
     @Test
     void testEstTransactionEligible(){
         Rule rule = new Rule();
-        rule.setMontantMin(50.0f);
+        rule.setAmountMin(50.0f);
         when(ruleRepository.findAll()).thenReturn(Collections.singletonList(rule));
 
         Transaction transaction = new Transaction();
-        transaction.setMontant(100.0f);
+        transaction.setAmount(100.0f);
         assertTrue(ruleService.estUneTransactionEligible(transaction));
 
-        transaction.setMontant(30.0f);
+        transaction.setAmount(30.0f);
         assertFalse(ruleService.estUneTransactionEligible(transaction));
     }
 

@@ -97,8 +97,10 @@ public class Mapper {
         Rule rule = new Rule();
         rule.setDescription(dto.getDescription());
         rule.setAmountMin(dto.getAmountMin());
+        rule.setAmountMax(dto.getAmountMax());
         rule.setPoints(dto.getPoints());
         rule.setAlwaysCredit(dto.getAlwaysCredit());
+        rule.setMinDaysForIrregularClients(dto.getMinDaysForIrregularClients());
         Optional<User> optionalUser = securityUtils.getCurrentUser();
         if (optionalUser.isEmpty())
             return rule;

@@ -17,6 +17,8 @@ public class Rule {
 
     private double amountMin;
 
+    private double amountMax;
+
     private Integer points;
 
     private Integer minDaysForIrregularClients;

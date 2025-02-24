@@ -3,10 +3,12 @@ package com.systemedebons.bonification.Controller;
 import com.systemedebons.bonification.Entity.BaseRule;
 import com.systemedebons.bonification.Entity.Rule;
 import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Repository.BaseRuleRepository;
 import com.systemedebons.bonification.Repository.RuleRepository;
 import com.systemedebons.bonification.Security.utils.SecurityUtils;
 import com.systemedebons.bonification.Service.RuleService;
 import com.systemedebons.bonification.Service.utils.Mapper;
+import com.systemedebons.bonification.payload.dto.BaseRuleDTO;
 import com.systemedebons.bonification.payload.dto.RuleDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +34,7 @@ public class RuleController {
     private final RuleService ruleService;
     private final SecurityUtils securityUtils;
     private final Mapper mapper;
+    private final BaseRuleRepository baseRuleRepository;
 
     @Operation(summary = "Retrieve all rules", description = "Returns a list of all rules.")
     @ApiResponse(responseCode = "200", description = "Successful retrieval of rules")
@@ -83,9 +86,20 @@ public class RuleController {
 
     @Operation(summary = "Set base rule for point conversion", description = "Set the baseRule")
     @ApiResponse(responseCode = "200", description = "BaseRule create")
-     @PostMapping("/rules-points/baseRule")
-    public ResponseEntity<BaseRule> createBaseRule(@RequestBody BaseRule baseRule) {
+    @PostMapping("/rules-points/baseRule")
+    public ResponseEntity<BaseRule> createBaseRule(@RequestBody BaseRuleDTO dto) {
+        BaseRule baseRule = new BaseRule();
+        baseRule.setId(dto.getId());
+        baseRule.setAmount(dto.getAmount());
+        baseRule.setUser(securityUtils.getCurrentUser().orElseThrow(() -> new RuntimeException("User not authenticated")));
         return ResponseEntity.ok(ruleService.createBaseRule(baseRule));
+    }
+
+    @Operation(summary = "Get base ruel", description = "Get the baseRule")
+    @ApiResponse(responseCode = "200", description = "BaseRule get")
+    @GetMapping("/rules-points/baseRule")
+    public ResponseEntity<BaseRule> getBaseRule() {
+        return ResponseEntity.ok(baseRuleRepository.findByUser(securityUtils.getCurrentUser().orElseThrow()));
     }
 
     @Operation(summary = "Delete a rule", description = "Deletes a rule using its ID.")

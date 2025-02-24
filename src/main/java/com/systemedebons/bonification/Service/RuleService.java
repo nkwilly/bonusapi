@@ -57,9 +57,18 @@ public class RuleService {
     public Rule saveRule(Rule rule) {
         if (rule.getUser() == null)
             rule.setUser(securityUtils.getCurrentUser().orElseThrow());
+        if (rule.getAmountMax() <= rule.getAmountMin())
+            throw new RuntimeException("Amount max should be greater than amount min");
         log.info("user = {}", rule.getUser());
-        if (securityUtils.isUserOfCurrentUser(rule.getUser().getId()) || securityUtils.isCurrentUserAdmin())
+        if (securityUtils.isUserOfCurrentUser(rule.getUser().getId()) || securityUtils.isCurrentUserAdmin()) {
+            List<Rule> rules = ruleRepository.findRuleByUser(rule.getUser());
+            log.info("existing rules = {}", rules);
+            rules.forEach(saveRule -> {
+                if (rule.getAmountMin() <= saveRule.getAmountMax() && rule.getAmountMax() >=  saveRule.getAmountMin())
+                    throw new RuntimeException("Save this rule is not possible");
+            });
             return ruleRepository.save(rule);
+        }
         throw new AccessRulesException();
     }
 
@@ -110,7 +119,7 @@ public class RuleService {
     public int computePoints(double amount) {
         List<Rule> rules = ruleRepository.findRuleByUser(securityUtils.getCurrentUser().orElseThrow(() -> new EntityNotFound("current user")));
         return rules.stream()
-                .map(rule -> amount >= rule.getAmountMin() ? rule.getPoints() : 0)
+                .map(rule -> amount >= rule.getAmountMin() && amount<= rule.getAmountMax() ? rule.getPoints() : 0)
                 .max(Integer::compareTo)
                 .orElseThrow(() -> new RuntimeException("Computation errors"));
     }

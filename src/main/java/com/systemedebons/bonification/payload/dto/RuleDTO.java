@@ -9,6 +9,8 @@ public class RuleDTO {
 
     private Double amountMin;
 
+    private Double amountMax;
+
     private Integer points;
 
     private Integer minDaysForIrregularClients;

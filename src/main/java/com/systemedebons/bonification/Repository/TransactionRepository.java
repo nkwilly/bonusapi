@@ -11,10 +11,11 @@ import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends MongoRepository<Transaction, String> {
-
-    List<Transaction> findByClient_Login(String clientLogin);
-
     List<Transaction> findByClient_User_Id(String clientUserId);
 
+    @Query("{ 'client.user' : ?0 }")
     List<Transaction> findByClient_User(User user);
+
+    @Query("{'client.user.id':  ?0}")
+    List<Transaction> findByClient_UserId(String clientUserId);
 }

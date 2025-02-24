@@ -1,5 +1,6 @@
 package com.systemedebons.bonification.Repository;
 
+import com.systemedebons.bonification.Entity.Client;
 import com.systemedebons.bonification.Entity.History;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -22,4 +23,6 @@ public interface HistoryRepository extends MongoRepository<History, String> {
     Optional<History> findTopByOrderByDateDesc();
 
     Optional<History> findTopByTransaction_Client_LoginOrderByDateDesc(String login);
+
+    Optional<History> findTopByTransaction_ClientOrderByDateDesc(Client client);
 }

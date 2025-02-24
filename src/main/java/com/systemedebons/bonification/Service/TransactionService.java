@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,13 +46,13 @@ public class TransactionService {
     public List<Transaction> getAllTransactions() {
         if (securityUtils.isCurrentUserAdmin())
             return transactionRepository.findAll();
-        List<Transaction> transactions = transactionRepository.findByClient_User(securityUtils
-                        .getCurrentUser()
-                        .orElseThrow(() -> new RuntimeException("User not logged in"))
-        );
+        List<Transaction> transactions = transactionRepository.findAll();
+        String currentUsername = securityUtils.getCurrentUser().orElseThrow().getLogin();
+        log.info("first transactions = {}", transactions);
+        transactions = transactions.stream().filter(transaction -> Objects.equals(transaction.getClient().getUser().getLogin(), currentUsername)).collect(Collectors.toList());
         log.info("transactions: {}", transactions);
         log.info("username = {}", securityUtils.getCurrentUser().get().getLogin());
-        return transactionRepository.findByClient_User_Id(securityUtils.getCurrentUser().map(User::getId).orElseThrow(() -> new RuntimeException("User not logged in")));
+        return transactions;
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -74,7 +75,6 @@ public class TransactionService {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public SavedTransactionResponse saveTransaction(TransactionDTO transactionDTO) {
         Transaction transaction = mapper.toTransaction(transactionDTO);
-
         if (!securityUtils.isClientOfCurrentUser(transaction.getClient().getLogin()) && !securityUtils.isCurrentUserAdmin())
             throw new AccessTransactionException();
 
@@ -129,7 +129,6 @@ public class TransactionService {
                 history.setPoints(-ruleService.computePoints(rest));
                 point.setNumber(0);
             }
-
             //Check if the amount will be debited from the customer's account
             if (rule.getAlwaysCredit()) {
                 int points = ruleService.computePoints(transaction.getAmount());
@@ -139,7 +138,7 @@ public class TransactionService {
             }
         }
         else {
-            Optional<History> optionalHistory = historyRepository.findTopByTransaction_Client_LoginOrderByDateDesc(transaction.getClient().getLogin());
+            Optional<History> optionalHistory = historyRepository.findTopByTransaction_ClientOrderByDateDesc(transaction.getClient());
             if (optionalHistory.isPresent()) {
                 long daysBetween = ChronoUnit.DAYS.between(LocalDate.now(), optionalHistory.get().getDate());
                 if (daysBetween - rule.getMinDaysForIrregularClients() < 0) {
@@ -167,7 +166,6 @@ public class TransactionService {
         log.debug("savedTransaction = {}", savedTransaction);
         log.debug("savedHistory = {}", savedHistory);
         log.debug("savedPoint = {}", savedPoint);
-
         return mapper.toSavedTransactionResponse(savedTransaction, message.toString());
     }
 

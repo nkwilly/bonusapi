@@ -15,18 +15,17 @@ import java.util.Optional;
 
 @Service
 public class RefreshTokenService {
-
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
-
-
-
     @Value("${jwt.refresh.expiration}")
     private int jwtRefreshExpirationMs;
 
+    private RefreshTokenRepository refreshTokenRepository;
 
-    @Autowired
     private JwtUtils jwtUtils;
+
+    public RefreshTokenService(RefreshTokenRepository refreshTokenRepository, JwtUtils jwtUtils) {
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.jwtUtils = jwtUtils;
+    }
 
     public RefreshToken createRefreshToken(String userId) {
         RefreshToken refreshToken = new RefreshToken();
@@ -35,8 +34,6 @@ public class RefreshTokenService {
         refreshToken.setExpiryDate(Instant.now().plusMillis(jwtUtils.getJwtRefreshExpirationMs()));
         return refreshTokenRepository.save(refreshToken);
     }
-
-
 
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
@@ -58,8 +55,6 @@ public class RefreshTokenService {
         });
     }
 
-
-
     public void updateRefreshToken(String userId, String newToken) {
         RefreshToken refreshToken = refreshTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new TokenRefreshException("User ID " + userId, "User not found"));
@@ -68,9 +63,6 @@ public class RefreshTokenService {
         refreshTokenRepository.save(refreshToken);
     }
 
-
-
-
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
     }
@@ -78,5 +70,4 @@ public class RefreshTokenService {
     public void deleteByToken(String token) {
         refreshTokenRepository.deleteByToken(token);
     }
-
 }

@@ -70,8 +70,9 @@ public class WebSecurityConfig {
         http.cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/**","/swagger-ui/**","/api/test/**").permitAll()
-                    .anyRequest().authenticated()
+                    .requestMatchers("/api/auth/**","/swagger-ui/**", "/v2/api-docs/**", "/api/test/**").permitAll()
+                  // .anyRequest().authenticated()
+                    .anyRequest().permitAll()
             )
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -87,7 +88,7 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://app-bonus.vercel.app")); // Changez cette URL selon votre frontend
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://app-bonus.vercel.app", "http://localhost:5173")); // Changez cette URL selon votre frontend
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -95,6 +96,5 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }
 

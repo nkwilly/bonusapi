@@ -5,18 +5,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
-
 @Data
-@Document(collection = "historiques")
-public class Historique {
+@Document
+public class    BaseRule {
     @Id
     private String id;
+
+    private Double amount;
+
     @DBRef
     private User user;
-    private LocalDate date;
-    private String type;
-    private int points;
-    private  float montantTransaction;
-    private String description;
 }

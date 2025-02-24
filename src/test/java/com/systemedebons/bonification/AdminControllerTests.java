@@ -70,8 +70,6 @@ public class AdminControllerTests {
                         .andExpect(jsonPath("$.administratorId").value("1"));
     }
 
-
-
     @Test
     void testDeleteAdministrator() throws Exception {
         doNothing().when(adminService).deleteAdministrator("1");

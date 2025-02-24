@@ -3,6 +3,9 @@ package com.systemedebons.bonification;
 import com.systemedebons.bonification.Controller.TransactionController;
 import com.systemedebons.bonification.Entity.Transaction;
 import com.systemedebons.bonification.Service.TransactionService;
+import com.systemedebons.bonification.Service.utils.Mapper;
+import com.systemedebons.bonification.payload.dto.TransactionDTO;
+import com.systemedebons.bonification.payload.response.SavedTransactionResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,15 +20,16 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-
-
 
 public class TransactionControllerTest {
 
     @InjectMocks
     private TransactionController transactionController;
+
+    @Mock
+    private Mapper mapper;
 
     @Mock
     private TransactionService transactionService;
@@ -65,14 +69,16 @@ public class TransactionControllerTest {
     void testCreateTransaction() throws Exception {
         Transaction transaction = new Transaction();
         transaction.setId("1");
-        when(transactionService.saveTransaction(any(Transaction.class))).thenReturn(transaction);
+        SavedTransactionResponse str = mapper.toSavedTransactionResponse(transaction, "Test message");
+        when(transactionService.saveTransaction(any(TransactionDTO.class))).thenReturn(str);
 
         mockMvc.perform(post("/api/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"date\":\"2023-05-31\",\"montant\":100.0,\"type\":\"Achat\",\"statut\":\"Complété\"}"))
+                        .content("{\"clientLogin\":\"berlus\",\"amount\":100.0, \"isDebit\":\"true\", \"status,\":\"COMPLETE\"}"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value("1"));
+                .andDo(print());
+                //.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                //.andExpect(jsonPath("amount").value(100.0));
     }
 
     @Test

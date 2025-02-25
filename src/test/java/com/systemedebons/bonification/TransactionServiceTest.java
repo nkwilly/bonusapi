@@ -64,7 +64,7 @@ public class TransactionServiceTest {
         // User user = new User("testUser", "password", List.of(new SimpleGrantedAuthority("ROLE_USER")));
         Role role = new Role();
         role.setId("1");
-        role.setName(ERole.ROLE_USER);
+        role.setName(ERole.ROLE_USER.name());
         mongoTemplate.save(role);
 
         User user = new User();

@@ -12,5 +12,5 @@ public class Role {
     private String id;
 
     @NotBlank
-    private ERole name;
+    private String name;
 }

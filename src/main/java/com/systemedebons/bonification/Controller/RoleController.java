@@ -17,14 +17,14 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/role")
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+//@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class RoleController {
     private static final Logger log = LoggerFactory.getLogger(RoleController.class);
 
     private RoleRepository roleRepository;
 
     @PostMapping
-    public ResponseEntity<Role> createUserRole(Role role) {
+    public ResponseEntity<Role> createUserRole(@RequestBody Role role) {
         return ResponseEntity.ok(roleRepository.save(role));
     }
 
@@ -41,7 +41,7 @@ public class RoleController {
     @PutMapping
     public ResponseEntity<Role> updateRole(@RequestParam ERole oldRole, @RequestParam ERole newRole) {
         Role role = roleRepository.findByName(oldRole).orElse(new Role());
-        role.setName(newRole);
+        role.setName(newRole.toString());
         return ResponseEntity.ok(roleRepository.save(role));
     }
 

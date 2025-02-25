@@ -53,14 +53,14 @@ public class TestController {
     @PostMapping("/create_role/user")
     public ResponseEntity<Role> createUserRole() {
         Role role = new Role();
-        role.setName(ERole.ROLE_USER);
+        role.setName(ERole.ROLE_USER.name());
         return new ResponseEntity<>(roleRepository.save(role), HttpStatus.CREATED);
     }
 
     @PostMapping("/create_role/admin")
     public ResponseEntity<Role> createAdminRole() {
         Role role = new Role();
-        role.setName(ERole.ROLE_ADMIN);
+        role.setName(ERole.ROLE_ADMIN.name());
         return new ResponseEntity<>(roleRepository.save(role), HttpStatus.CREATED);
     }
 

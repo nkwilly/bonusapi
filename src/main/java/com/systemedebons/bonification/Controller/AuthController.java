@@ -70,9 +70,11 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         logger.debug("Hello world");
         Authentication authentication;
+        User user = userRepository.findByLogin(loginRequest.getLogin()).orElseThrow();
+        logger.info("user = {}, password = {}", user, loginRequest.getPassword());
         authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getLogin(), loginRequest.getPassword()));
-        logger.debug("Hello world");
+        logger.debug("Hello world 2 ");
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(authentication.getName());

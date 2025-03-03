@@ -2,7 +2,7 @@
 
 ## Présentation de l'API
 
-L'API de Bonification est un service backend conçu pour gérer et appliquer des règles de bonification dans un système de récompenses ou de fidélité. Elle permet aux administrateurs de définir des règles de bonification personnalisées qui peuvent être appliquées automatiquement en fonction des actions des utilisateurs ou des transactions effectuées.
+L'API de Bonification est un service backend conçu pour gérer et appliquer des règles de bonification dans un système de récompenses ou de fidélité. Elle permet aux administrateurs de définir des règles de bonification personnalisées qui peuvent être appliquées automatiquement en fonction des actions des utilisateurs ou des transactions effectuées. La branche main qui est la branche déployée est disponible sur render et est liée à une base de données mongodb. Sur la branche scylladb il y a la même API mais avec des configurations pour tourner en local uniquement. 
 
 ### Fonctionnalités principales :
 - **Création et gestion des règles de bonification** : Les administrateurs peuvent créer, modifier et supprimer des règles de bonification via l'API.

@@ -3,11 +3,11 @@ package com.systemedebons.bonification;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 
 
 @SpringBootApplication
-@EnableMongoRepositories(basePackages = "com.systemedebons.bonification.Repository")
+@EnableCassandraRepositories(basePackages = "com.systemedebons.bonification.Repository")
 @ComponentScan({"com.systemedebons.bonification", "com.systemedebons.bonification.Security.Service"})
 public class BonificationApiApplication {
 

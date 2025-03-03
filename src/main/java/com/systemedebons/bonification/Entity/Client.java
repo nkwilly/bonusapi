@@ -1,27 +1,24 @@
 package com.systemedebons.bonification.Entity;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.cassandra.core.cql.Ordering;
+import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
+import org.springframework.data.cassandra.core.mapping.*;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Document(collection = "clients")
+@Table("clients")
 public class Client {
 
-    @Id
+    @PrimaryKey
     private String id;
 
-    @Indexed(unique = true)
+    @Column
     private String login;
 
-    @DBRef
-    private User user;
+    @Column("user_id")
+    private String userId;
 }
+

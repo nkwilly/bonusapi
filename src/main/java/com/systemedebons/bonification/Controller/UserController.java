@@ -46,9 +46,11 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User successfully created")
     @ApiResponse(responseCode = "400", description = "Invalid user data")
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> createUser(@Valid  @RequestBody User user) {
         try {
             User  saveUser = userService.saveUser(user);
+
             return ResponseEntity.ok(saveUser);
         }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body(null);

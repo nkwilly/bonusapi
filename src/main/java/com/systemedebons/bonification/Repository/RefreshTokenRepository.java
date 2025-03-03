@@ -1,14 +1,14 @@
 package com.systemedebons.bonification.Repository;
 
 import com.systemedebons.bonification.Entity.RefreshToken;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.cassandra.repository.CassandraRepository;
 
 import java.util.Optional;
 
-public interface RefreshTokenRepository extends MongoRepository<RefreshToken, String> {
+public interface RefreshTokenRepository extends CassandraRepository<RefreshToken, String> {
 
-    Optional<RefreshToken> findByToken(String token);
+    Optional<RefreshToken> findByTokens(String token);
         void deleteByUserId(String userId);
-    void deleteByToken(String token);
+    void deleteByTokens(String token);
     Optional<RefreshToken> findByUserId(String userId);
 }

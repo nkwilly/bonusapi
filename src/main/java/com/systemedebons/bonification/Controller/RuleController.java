@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Api
@@ -64,6 +65,7 @@ public class RuleController {
     @PostMapping
     public Rule createRule(@RequestBody @Valid RuleDTO dto) {
         Rule rule = mapper.toRule(dto);
+        log.info("rule {}", rule);
         return ruleService.saveRule(rule);
     }
 
@@ -72,7 +74,7 @@ public class RuleController {
     @GetMapping("/rules-amount/{amount}")
     public ResponseEntity<Integer> getRulesByAmount(@PathVariable Double amount) {
         User currentUser = securityUtils.getCurrentUser().orElseThrow(() -> new RuntimeException("User not authenticated"));
-        List<Rule> rules = ruleRepository.findByUserAndAmountMinLessThan(currentUser, amount);
+        List<Rule> rules = ruleRepository.findByUserIdAndAmountMinLessThan(currentUser.getId(), amount);
         Optional<Integer> points = rules.stream().map(Rule::getPoints).max(Integer::compareTo);
         return points.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.ok(0));
     }
@@ -89,9 +91,9 @@ public class RuleController {
     @PostMapping("/rules-points/baseRule")
     public ResponseEntity<BaseRule> createBaseRule(@RequestBody BaseRuleDTO dto) {
         BaseRule baseRule = new BaseRule();
-        baseRule.setId(dto.getId());
+        baseRule.setId(UUID.randomUUID().toString());
         baseRule.setAmount(dto.getAmount());
-        baseRule.setUser(securityUtils.getCurrentUser().orElseThrow(() -> new RuntimeException("User not authenticated")));
+        baseRule.setUserId(securityUtils.getCurrentUser().orElseThrow(() -> new RuntimeException("User not authenticated")).getId());
         return ResponseEntity.ok(ruleService.createBaseRule(baseRule));
     }
 
@@ -99,7 +101,7 @@ public class RuleController {
     @ApiResponse(responseCode = "200", description = "BaseRule get")
     @GetMapping("/rules-points/baseRule")
     public ResponseEntity<BaseRule> getBaseRule() {
-        return ResponseEntity.ok(baseRuleRepository.findByUser(securityUtils.getCurrentUser().orElseThrow()));
+        return ResponseEntity.ok(baseRuleRepository.findByUserId(securityUtils.getCurrentUser().orElseThrow().getId()));
     }
 
     @Operation(summary = "Delete a rule", description = "Deletes a rule using its ID.")

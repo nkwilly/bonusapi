@@ -6,7 +6,7 @@ import com.systemedebons.bonification.Repository.HistoryRepository;
 import com.systemedebons.bonification.Repository.TransactionRepository;
 import com.systemedebons.bonification.Repository.UserRepository;
 import com.systemedebons.bonification.Security.utils.SecurityUtils;
-import com.systemedebons.bonification.payload.dto.RewardDTO;
+import com.systemedebons.bonification.payload.dto.HistoryDTO;
 import com.systemedebons.bonification.payload.dto.RuleDTO;
 import com.systemedebons.bonification.payload.dto.TransactionHistoryDTO;
 import com.systemedebons.bonification.payload.exception.EntityNotFound;
@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,9 +36,7 @@ public class Mapper {
         transaction.setAmount(dto.getAmount());
         transaction.setIsDebit(dto.getIsDebit());
         transaction.setStatus(dto.getStatus());
-        log.debug("clientLogin = {}", dto);
-        Client client = clientRepository.findByLogin(dto.getClientLogin()).orElseThrow(() -> new EntityNotFound("Client not found"));
-        transaction.setClient(client);
+        transaction.setClientLogin(dto.getClientLogin());
         return transaction;
     }
 
@@ -57,7 +54,7 @@ public class Mapper {
         dto.setAmount(transaction.getAmount());
         dto.setIsDebit(transaction.getIsDebit());
         dto.setStatus(transaction.getStatus());
-        dto.setClientLogin(transaction.getClient().getLogin());
+        dto.setClientLogin(transaction.getClientLogin());
         return dto;
     }
 
@@ -66,7 +63,7 @@ public class Mapper {
         str.setId(transaction.getId());
         str.setAmount(transaction.getAmount());
         str.setIsDebit(transaction.getIsDebit());
-        str.setClientLogin(transaction.getClient().getLogin());
+        str.setClientId(transaction.getClientLogin());
         str.setIsDebit(transaction.getIsDebit());
         str.setMessage(message);
         return str;
@@ -78,20 +75,13 @@ public class Mapper {
         dto.setAmount(transaction.getAmount());
         dto.setIsDebit(transaction.getIsDebit());
         dto.setStatus(transaction.getStatus());
-        dto.setClientLogin(transaction.getClient().getLogin());
+        dto.setClientLogin(transaction.getClientLogin());
         History history = historyRepository.findByTransactionId(dto.getId()).orElseThrow();
         dto.setDate(history.getDate());
         dto.setPoints(history.getPoints());
         return dto;
     }
 
-    public Reward toReward(RewardDTO dto) {
-        Reward reward = new Reward();
-        reward.setValue(dto.getValue());
-        User user = securityUtils.getCurrentUser().orElseThrow(() -> new EntityNotFound("Client not found"));
-        reward.setUser(user);
-        return reward;
-    }
 
     public Rule toRule(RuleDTO dto) {
         Rule rule = new Rule();
@@ -104,7 +94,29 @@ public class Mapper {
         Optional<User> optionalUser = securityUtils.getCurrentUser();
         if (optionalUser.isEmpty())
             return rule;
-        rule.setUser(optionalUser.get());
+        rule.setUserId(optionalUser.get().getId());
         return rule;
+    }
+
+    public History toHistory(HistoryDTO dto) {
+        History history = new History();
+        history.setId(dto.getId());
+        history.setDate(dto.getDate());
+        history.setPoints(dto.getPoints());
+        history.setTransactionId(dto.getTransactionId());
+        history.setClientId(dto.getClientId());
+        User user = securityUtils.getCurrentUser().orElseThrow();
+        history.setUserId(user.getId());
+        return history;
+    }
+
+    public HistoryDTO toHistoryDTO(History history) {
+        HistoryDTO dto = new HistoryDTO();
+        dto.setId(history.getId());
+        dto.setDate(history.getDate());
+        dto.setPoints(history.getPoints());
+        dto.setTransactionId(history.getTransactionId());
+        dto.setClientId(history.getClientId());
+        return dto;
     }
 }

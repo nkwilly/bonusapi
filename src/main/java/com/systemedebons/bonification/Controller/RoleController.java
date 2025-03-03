@@ -35,19 +35,19 @@ public class RoleController {
 
     @GetMapping
     public ResponseEntity<Role> getRoleByName(@RequestParam ERole role) {
-        return ResponseEntity.of(roleRepository.findByName(role));
+        return ResponseEntity.of(roleRepository.findByName(role.name()));
     }
 
     @PutMapping
     public ResponseEntity<Role> updateRole(@RequestParam ERole oldRole, @RequestParam ERole newRole) {
-        Role role = roleRepository.findByName(oldRole).orElse(new Role());
+        Role role = roleRepository.findByName(oldRole.name()).orElse(new Role());
         role.setName(newRole.toString());
         return ResponseEntity.ok(roleRepository.save(role));
     }
 
     @DeleteMapping
     public ResponseEntity<?> deleteRole(@RequestParam ERole role) throws RoleNotFoundException {
-        Role deleleRole = roleRepository.findByName(role).orElseThrow(() -> new RoleNotFoundException(role.toString()));
+        Role deleleRole = roleRepository.findByName(role.name()).orElseThrow(() -> new RoleNotFoundException(role.toString()));
         roleRepository.delete(deleleRole);
         return ResponseEntity.ok(HttpStatus.OK);
     }

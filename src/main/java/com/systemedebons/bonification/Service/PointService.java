@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -49,26 +50,31 @@ public class PointService {
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public Optional<Point> createPoint(Point point) {
-        if (securityUtils.isClientOfCurrentUser(point.getClient().getLogin()) || securityUtils.isCurrentUserAdmin())
+        if (securityUtils.isClientOfCurrentUser(point.getClientId()) || securityUtils.isCurrentUserAdmin()) {
+            point.setUserId(securityUtils.getCurrentUser().orElseThrow().getId());
+            point.setId(UUID.randomUUID().toString());
             return Optional.of(pointRepository.save(point));
+        }
         throw new AccessPointsException();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public Optional<Point> getPointsByClientLogin(String clientLogin) {
+    public Optional<Point> getPointsByClientId(String clientLogin) {
         if (securityUtils.isClientOfCurrentUser(clientLogin) || securityUtils.isCurrentUserAdmin()) {
             Client client = clientRepository.findByLogin(clientLogin).orElse(null);
             assert client != null;
             return pointRepository.findByClientId(client.getId());
         }
-
         throw new AccessPointsException();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public Point savePoint(Point point) {
-        if (securityUtils.isClientOfCurrentUser(point.getClient().getLogin()) || securityUtils.isCurrentUserAdmin())
+        if (securityUtils.isClientOfCurrentUser(point.getClientId()) || securityUtils.isCurrentUserAdmin()) {
+            point.setUserId(securityUtils.getCurrentUser().orElseThrow().getId());
+            point.setId(UUID.randomUUID().toString());
             return pointRepository.save(point);
+        }
         throw new AccessPointsException();
     }
 
@@ -83,22 +89,21 @@ public class PointService {
     public int getSoldePoints(@PathVariable  String clientLogin) {
         if (securityUtils.isClientOfCurrentUser(clientLogin) || securityUtils.isCurrentUserAdmin()) {
             Client client = clientRepository.findByLogin(clientLogin).orElseThrow();
-            Optional<Point> point = pointRepository.findByClient_Id(client.getId());
+            Optional<Point> point = pointRepository.findByClientId(client.getId());
             if (point.isPresent())
                 return point.get().getNumber();
-
         }
         return 0;
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<Point> getAllPointsForUser(String userId) {
-        return pointRepository.getAllClientsForUser(userId);
+        return pointRepository.getPointByUserId(userId);
     }
     
     @PreAuthorize("hasRole('ROLE_USER')")
     public List<Point> getAllPointsForUser() {
         User currentUser = securityUtils.getCurrentUser().orElseThrow(UsernameNotFoundException::new);
-        return pointRepository.getAllClientsForUser(currentUser.getId());
+        return pointRepository.getPointByUserId(currentUser.getId());
     }
 }

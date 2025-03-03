@@ -11,7 +11,7 @@ public class SavedTransactionResponse {
 
     private Statuts statuts;
 
-    private String clientLogin;
+    private String clientId;
 
     private Boolean isDebit;
 

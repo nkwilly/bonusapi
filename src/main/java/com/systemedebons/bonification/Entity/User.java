@@ -10,35 +10,33 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import java.util.HashSet;
-import java.util.Set;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Document(collection = "users")
+@Table("users")
 public class User {
 
-    @Id
-    private String id; //Id de l'API qui utilise la notre
+    @PrimaryKey
+    private String id; // Id de l'API qui utilise la nôtre
 
+    @Column
     @NotBlank
     @Size(max = 20)
-    private String login; //Login de l'API
+    private String login; // Login de l'API
 
+    @Column
     @Email(message = "Email doit être valide")
     @Size(max = 50)
     @NotBlank(message = "L'email est obligatoire")
     private String email;
 
+    @Column
     @NotBlank(message = "Le mot de passe est obligatoire")
     private String password;
 
-    @DBRef
-    private Set<Role> roles = new HashSet<>();
-
+    @Column("reset_token")
     private String resetToken;
 
     @JsonCreator

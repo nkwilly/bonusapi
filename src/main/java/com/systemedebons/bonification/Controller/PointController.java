@@ -60,20 +60,20 @@ public class PointController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Retrieve point balance", description = "Fetches the point balance for a given client login.")
+    @Operation(summary = "Retrieve point balance", description = "Fetches the point balance for a given client id.")
     @ApiResponse(responseCode = "200", description = "Point balance retrieved")
-    @GetMapping("/solde/{clientLogin}")
-    public ResponseEntity<Integer> getSoldePoint(@PathVariable String clientLogin) {
-        int solde = pointService.getSoldePoints(clientLogin);
+    @GetMapping("/solde/{clientId}")
+    public ResponseEntity<Integer> getSoldePoint(@PathVariable String clientId) {
+        int solde = pointService.getSoldePoints(clientId);
         return ResponseEntity.ok(solde);
     }
 
-    @Operation(summary = "Retrieve points by client login", description = "Fetches all points associated with a given client login.")
+    @Operation(summary = "Retrieve points by client id", description = "Fetches all points associated with a given client id.")
     @ApiResponse(responseCode = "200", description = "Points retrieved")
     @ApiResponse(responseCode = "404", description = "Points not found")
-    @GetMapping("/user/{clientLogin}")
-    public ResponseEntity<Point> getPointsByClientLogin(@PathVariable String clientLogin) {
-        return pointService.getPointsByClientLogin(clientLogin).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/user/{clientId}")
+    public ResponseEntity<Point> getPointsByClientId(@PathVariable String clientId) {
+        return pointService.getPointsByClientId(clientId).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Retrieve all points by user ID", description = "Fetches all points for a given user ID.")

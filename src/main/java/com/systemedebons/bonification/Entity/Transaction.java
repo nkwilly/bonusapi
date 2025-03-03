@@ -1,25 +1,30 @@
 package com.systemedebons.bonification.Entity;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.LocalDate;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
 @Data
-@Document(collection = "transactions")
+@Table("transactions")
 public class Transaction {
 
-    @Id
+    @PrimaryKey
     private String id;
 
+    @Column
     private double amount;
 
+    @Column
     private Statuts status;
 
-    @DBRef
-    private Client client;
+    @Column("client_login")
+    private String clientLogin;
 
-    private Boolean isDebit; // Si True alors on intègre le calcul des points dans la facturation et il y a donc débit de points.
+    @Column("user_id")
+    private String userId;
+
+    @Column("is_debit")
+    private Boolean isDebit;
 }
+

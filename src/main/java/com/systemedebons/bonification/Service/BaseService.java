@@ -4,7 +4,6 @@ import com.systemedebons.bonification.Entity.BaseRule;
 import com.systemedebons.bonification.Repository.BaseRuleRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +28,10 @@ public class BaseService {
 
     public BaseRule updateBaseRule(BaseRule baseRule) {
         return baseRuleRepository.save(baseRule);
+    }
+
+    public BaseRule findBaseRuleByUserId(String userId) {
+        return baseRuleRepository.findByUserId(userId);
     }
 
     public void deleteBaseRule(String id) {

@@ -2,6 +2,7 @@ package com.systemedebons.bonification.Controller;
 
 import com.systemedebons.bonification.Entity.History;
 import com.systemedebons.bonification.Service.HistoryService;
+import com.systemedebons.bonification.payload.dto.HistoryDTO;
 import com.systemedebons.bonification.payload.request.HistoryRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,22 +45,22 @@ public class HistoryController {
     @Operation(summary = "Retrieve histories by user ID", description = "Fetches all histories associated with a given user ID.")
     @ApiResponse(responseCode = "200", description = "Histories retrieved")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<History>> getHistoryByClients(@PathVariable String userId) {
+    public ResponseEntity<List<HistoryDTO>> getHistoryByClients(@PathVariable String userId) {
         return new ResponseEntity<>(historyService.getHistoryByUserId(userId), HttpStatus.OK);
     }
 
     @Operation(summary = "Retrieve histories for the current user", description = "Fetches all histories associated with the currently authenticated user.")
     @ApiResponse(responseCode = "200", description = "Histories retrieved")
     @GetMapping("/user")
-    public ResponseEntity<List<History>> getHistoryByUser() {
+    public ResponseEntity<List<HistoryDTO>> getHistoryByUser() {
         return new ResponseEntity<>(historyService.getHistoryByUserId(), HttpStatus.OK);
     }
 
     @Operation(summary = "Create a new history entry", description = "Saves a new transaction history.")
     @ApiResponse(responseCode = "200", description = "History successfully created")
     @PostMapping
-    public History createHistory(@RequestBody History history) {
-        return historyService.saveHistory(history);
+    public HistoryDTO createHistory(@RequestBody HistoryDTO historyDTO) {
+        return historyService.saveHistory(historyDTO);
     }
 
     @Operation(summary = "Delete a history entry", description = "Deletes a history using its ID.")
@@ -70,11 +71,11 @@ public class HistoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Retrieve history by client login", description = "Fetches all transaction histories associated with a given client login.")
+    @Operation(summary = "Retrieve history by client id", description = "Fetches all transaction histories associated with a given client id.")
     @ApiResponse(responseCode = "200", description = "Histories retrieved")
-    @GetMapping("/clients/{clientLogin}")
-    public ResponseEntity<List<History>> getHistoryByclientLogin(@PathVariable String clientLogin) {
-        List<History> historyList = historyService.getHistoryByclientLogin(clientLogin);
+    @GetMapping("/clients/{clientId}")
+    public ResponseEntity<List<HistoryDTO>> getHistoryByclientLogin(@PathVariable String clientId) {
+        List<HistoryDTO> historyList = historyService.getHistoryByClientId(clientId);
         return ResponseEntity.ok(historyList);
     }
 
@@ -82,8 +83,8 @@ public class HistoryController {
     @ApiResponse(responseCode = "200", description = "Histories retrieved")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/users/{UserId}")
-    public ResponseEntity<List<History>> getHistoryByUserId(@PathVariable String UserId) {
-        List<History> historyList = historyService.getHistoryByUserId(UserId);
+    public ResponseEntity<List<HistoryDTO>> getHistoryByUserId(@PathVariable String UserId) {
+        List<HistoryDTO> historyList = historyService.getHistoryByUserId(UserId);
         return ResponseEntity.ok(historyList);
     }
 
@@ -92,12 +93,12 @@ public class HistoryController {
     @ApiResponse(responseCode = "404", description = "History not found")
     @GetMapping("/transaction/{id}")
     public ResponseEntity<HistoryRequest> getHistoryByTransactionId(@PathVariable String id) {
-        Optional<History> history = historyService.getHistoryByTransactionId(id);
+        Optional<HistoryDTO> history = historyService.getHistoryByTransactionId(id);
         if (history.isPresent()) {
             HistoryRequest historyRequest = new HistoryRequest();
             historyRequest.setId(history.get().getId());
             historyRequest.setPoints(history.get().getPoints());
-            historyRequest.setTransactionId(history.get().getTransaction().getId());
+            historyRequest.setTransactionId(history.get().getTransactionId());
             return ResponseEntity.ok(historyRequest);
         }
         return ResponseEntity.notFound().build();

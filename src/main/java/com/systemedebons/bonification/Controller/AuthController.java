@@ -1,12 +1,10 @@
 package com.systemedebons.bonification.Controller;
 
-import com.systemedebons.bonification.Entity.ERole;
-import com.systemedebons.bonification.Entity.RefreshToken;
-import com.systemedebons.bonification.Entity.Role;
-import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Entity.*;
 import com.systemedebons.bonification.Repository.RefreshTokenRepository;
 import com.systemedebons.bonification.Repository.RoleRepository;
 import com.systemedebons.bonification.Repository.UserRepository;
+import com.systemedebons.bonification.Repository.UserRoleRepository;
 import com.systemedebons.bonification.Security.Jwt.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,10 +34,7 @@ import jakarta.validation.Valid;
 import com.systemedebons.bonification.payload.request.LoginRequest;
 import com.systemedebons.bonification.payload.request.TokenRefreshRequest;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -53,6 +48,7 @@ import org.slf4j.LoggerFactory;
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private final UserRoleRepository userRoleRepository;
 
     AuthenticationManager authenticationManager;
     UserRepository userRepository;
@@ -84,7 +80,7 @@ public class AuthController {
                 .collect(Collectors.toList());
         logger.info("jwt = {}", jwt);
         logger.info("roles = {}", roles);
-        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(),
+        return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getTokens(),
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
@@ -101,27 +97,29 @@ public class AuthController {
                     .badRequest()
                     .body(new MessageResponse("Error: Username is already taken!"));
         }
-
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
-
         User user = new User(signUpRequest.getLogin(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
-
         Set<Role> roles = new HashSet<>();
-        Role role = roleRepository.findByName(ERole.ROLE_USER).orElseThrow(() -> {
+        Role role = roleRepository.findByName(ERole.ROLE_USER.name()).orElseThrow(() -> {
             logger.error("Role not found: {}", ERole.ROLE_USER);
             return new RuntimeException("Internal Error");
         });
+
         roles.add(role);
-
-        user.setRoles(roles);
-        userRepository.save(user);
-
+        user.setId(UUID.randomUUID().toString());
+        User savedUser = userRepository.save(user);
+        UserRoles userRole = new UserRoles();
+        userRole.setId(UUID.randomUUID().toString());
+        userRole.setRoleId(role.getId());
+        userRole.setUserId(savedUser.getId());
+        UserRoles savedRole = userRoleRepository.save(userRole);
+        logger.info("savedRole = {}", savedRole);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 

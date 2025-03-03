@@ -1,27 +1,29 @@
 package com.systemedebons.bonification.Entity;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.time.Instant;
-import java.util.Date;
 
 @Data
-@Document(collection = "refresh_tokens")
+@Table("refresh_token")
 public class RefreshToken {
 
-    @Id
+    @PrimaryKey
     private String id;
 
+    @Column("user_id")
     private String userId;
 
-    private String token;
+    @Column
+    private String tokens;
 
+    @Column("expiry_date")
     private Instant expiryDate;
 
-   public boolean isExpired() {
-       return Instant.now().isAfter(expiryDate);
-   }
-
+    public boolean isExpired() {
+        return Instant.now().isAfter(expiryDate);
+    }
 }

@@ -41,6 +41,8 @@ public class TransactionService {
 
     private final Mapper mapper;
     private final RuleRepository ruleRepository;
+    private final ClientRepository clientRepository;
+    private final UserRepository userRepository;
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public List<Transaction> getAllTransactions() {
@@ -49,7 +51,11 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository.findAll();
         String currentUsername = securityUtils.getCurrentUser().orElseThrow().getLogin();
         log.info("first transactions = {}", transactions);
-        transactions = transactions.stream().filter(transaction -> Objects.equals(transaction.getClient().getUser().getLogin(), currentUsername)).collect(Collectors.toList());
+        transactions = transactions.stream().filter(transaction ->  {
+            Client client = clientRepository.findById(transaction.getClientLogin()).orElseThrow();
+            User user = userRepository.findById(transaction.getUserId()).orElseThrow();
+            return Objects.equals(user.getLogin(), currentUsername);
+        }).collect(Collectors.toList());
         log.info("transactions: {}", transactions);
         log.info("username = {}", securityUtils.getCurrentUser().get().getLogin());
         return transactions;
@@ -57,7 +63,7 @@ public class TransactionService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<TransactionHistoryDTO> getAllTransactionsByUser(String userId){
-        List<Transaction> transactions = transactionRepository.findByClient_User_Id(userId);
+        List<Transaction> transactions = transactionRepository.findByUserId(userId);
         return transactions.stream().map(mapper::toTransactionHistoryDTO).collect(Collectors.toList());
     }
 
@@ -66,7 +72,7 @@ public class TransactionService {
         Optional<Transaction> transaction = transactionRepository.findById(transactionId);
         if (transaction.isEmpty())
             return Optional.empty();
-        if (securityUtils.isClientOfCurrentUser(transaction.get().getClient().getLogin()) || securityUtils.isCurrentUserAdmin() )
+        if (securityUtils.isClientOfCurrentUser(transaction.get().getClientLogin()) || securityUtils.isCurrentUserAdmin() )
             return transaction;
         throw new AccessTransactionException();
     }
@@ -75,21 +81,25 @@ public class TransactionService {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public SavedTransactionResponse saveTransaction(TransactionDTO transactionDTO) {
         Transaction transaction = mapper.toTransaction(transactionDTO);
-        if (!securityUtils.isClientOfCurrentUser(transaction.getClient().getLogin()) && !securityUtils.isCurrentUserAdmin())
+        if (!securityUtils.isClientOfCurrentUser(transaction.getClientLogin()) && !securityUtils.isCurrentUserAdmin())
             throw new AccessTransactionException();
 
         // Création of point's instance
-        Optional<Point> getPoint = pointRepository.findByClient_Id(transaction.getClient().getId());
+        Optional<Point> getPoint = pointRepository.findByClientId(transaction.getClientLogin());
         Point point = new Point();
         if (getPoint.isEmpty()) {
             point.setNumber(0);
-            point.setClient(transaction.getClient());
+            point.setClientId(transaction.getClientLogin());
         }
         else point = getPoint.get();
 
         // Get Rule that's correspond to the amount of transaction.
         Rule rule;
-        Optional<Rule> optionalRule = ruleRepository.findFirstByUserAndAmountMinLessThan(transaction.getClient().getUser(), transaction.getAmount());
+        log.info("clientLogin : {}", transaction.getClientLogin());
+        Client client = clientRepository.findByLogin(transaction.getClientLogin()).orElseThrow();
+        User user = userRepository.findById(client.getUserId()).orElseThrow();
+
+        Optional<Rule> optionalRule = ruleRepository.findFirstByUserIdAndAmountMinLessThan(user.getId(), transaction.getAmount(), 5);
         if (optionalRule.isEmpty()) {
             rule = new Rule();
             rule.setAmountMin(0);
@@ -138,7 +148,8 @@ public class TransactionService {
             }
         }
         else {
-            Optional<History> optionalHistory = historyRepository.findTopByTransaction_ClientOrderByDateDesc(transaction.getClient());
+
+            Optional<History> optionalHistory = historyRepository.findTopByClientIdOrderByDateDesc(client.getId());
             if (optionalHistory.isPresent()) {
                 long daysBetween = ChronoUnit.DAYS.between(LocalDate.now(), optionalHistory.get().getDate());
                 if (daysBetween - rule.getMinDaysForIrregularClients() < 0) {
@@ -158,9 +169,15 @@ public class TransactionService {
             }
         }
         transaction.setId(UUID.randomUUID().toString());
+        transaction.setUserId(user.getId());
         Transaction savedTransaction = transactionRepository.save(transaction);
-        history.setTransaction(savedTransaction);
+        history.setTransactionId(savedTransaction.getId());
+        history.setUserId(user.getId());
+        history.setId(UUID.randomUUID().toString());
+        history.setClientId(client.getId());
         History savedHistory = historyRepository.save(history);
+        point.setUserId(user.getId());
+        point.setId(UUID.randomUUID().toString());
         Point savedPoint = pointRepository.save(point);
 
         log.debug("savedTransaction = {}", savedTransaction);
@@ -172,7 +189,7 @@ public class TransactionService {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public void deleteTransaction(String transcationId) {
         Transaction transaction = transactionRepository.findById(transcationId).orElse(new Transaction());
-        if (securityUtils.isClientOfCurrentUser(transaction.getClient().getLogin()) || securityUtils.isCurrentUserAdmin())
+        if (securityUtils.isClientOfCurrentUser(transaction.getClientLogin()) || securityUtils.isCurrentUserAdmin())
             transactionRepository.deleteById(transcationId);
         throw new AccessTransactionException();
     }

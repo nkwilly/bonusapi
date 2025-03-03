@@ -6,7 +6,6 @@ import com.systemedebons.bonification.Entity.User;
 import com.systemedebons.bonification.Repository.ClientRepository;
 import com.systemedebons.bonification.Security.utils.SecurityUtils;
 import com.systemedebons.bonification.payload.exception.AccessClientException;
-import com.systemedebons.bonification.payload.exception.DuplicateException;
 import com.systemedebons.bonification.payload.exception.UsernameNotFoundException;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -56,9 +56,10 @@ public class ClientService {
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
     public Optional<Client> createClient(String clientLogin) {
         Client client = new Client();
+        client.setId(UUID.randomUUID().toString());
         client.setLogin(clientLogin);
         User user = securityUtils.getCurrentUser().orElseThrow((UsernameNotFoundException::new));
-        client.setUser(user);
+        client.setUserId(user.getId());
         return Optional.of(clientRepository.save(client));
     }
 

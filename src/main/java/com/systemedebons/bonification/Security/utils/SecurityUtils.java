@@ -1,9 +1,13 @@
 package com.systemedebons.bonification.Security.utils;
 
 import com.systemedebons.bonification.Entity.Client;
+import com.systemedebons.bonification.Entity.Role;
 import com.systemedebons.bonification.Entity.User;
+import com.systemedebons.bonification.Entity.UserRoles;
 import com.systemedebons.bonification.Repository.ClientRepository;
+import com.systemedebons.bonification.Repository.RoleRepository;
 import com.systemedebons.bonification.Repository.UserRepository;
+import com.systemedebons.bonification.Repository.UserRoleRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 public class SecurityUtils {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityUtils.class);
+    private final UserRoleRepository userRoleRepository;
+    private final RoleRepository roleRepository;
     private UserRepository userRepository;
 
     private ClientRepository clientRepository;
@@ -37,9 +42,16 @@ public class SecurityUtils {
     }
 
     public Set<GrantedAuthority> getCurrentAuthorities() {
-        return getCurrentUser().map(User::getRoles).
-                stream().map(elt -> new SimpleGrantedAuthority(elt.toString()))
-                .collect(Collectors.toSet());
+        Optional<User> optionalUser = getCurrentUser();
+        if (optionalUser.isPresent())
+            return userRoleRepository.findByUserId(optionalUser.get().getId())
+                    .stream().map(UserRoles::getRoleId)
+                    .map(roleRepository::findById)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .map(Role::getName)
+                    .map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+        throw new RuntimeException("User has not authorities yet");
     }
 
     public Optional<Object> getCurrentPrincipal() {
@@ -57,13 +69,13 @@ public class SecurityUtils {
 
     public boolean isClientOfCurrentUser(String clientLogin) {
         Client client = clientRepository.findByLogin(clientLogin).orElse(new Client());
-        User user = getCurrentUser().orElse(new User());
-        return user.getId().equals(client.getUser().getId());
+        User user = getCurrentUser().orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getId().equals(client.getUserId());
     }
 
     public boolean isUserOfCurrentUser(String userId) {
         return getCurrentUser()
-                .orElse(new User())
+                .orElseThrow(() -> new RuntimeException("User not found"))
                 .getId().equals(userId);
     }
 

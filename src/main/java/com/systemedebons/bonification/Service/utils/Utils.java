@@ -17,11 +17,11 @@ public class Utils {
     private ClientRepository clientRepository;
 
     public boolean clientForUser(User user, Client client) {
-        return client.getUser().getId().equals(user.getId());
+        return client.getUserId().equals(user.getId());
     }
 
     public boolean clientForUser(String username, String clientLogin) {
-        User user = userRepository.findByLogin(username).orElse(new User());
+        User user = userRepository.findByLogin(username).orElseThrow(() -> new RuntimeException("User not found"));
         Client client = clientRepository.findById(clientLogin).orElse(new Client());
         return clientForUser(user, client);
     }
@@ -31,8 +31,8 @@ public class Utils {
     }
 
     public boolean userForUser(String currentUsername, String otherUsername) {
-        User currentUser = userRepository.findByLogin(currentUsername).orElse(new User());
-        User otherUser = userRepository.findByLogin(otherUsername).orElse(new User());
+        User currentUser = userRepository.findByLogin(currentUsername).orElseThrow(() -> new RuntimeException("User not found"));
+        User otherUser = userRepository.findByLogin(otherUsername).orElseThrow(() -> new RuntimeException("User not found"));
         return userForUser(currentUser, otherUser);
     }
 

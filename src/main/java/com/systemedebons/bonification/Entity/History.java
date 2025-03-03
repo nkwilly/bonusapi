@@ -1,23 +1,31 @@
 package com.systemedebons.bonification.Entity;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
-@Document(collection = "history")
+@Table("history")
 public class History {
-    @Id
+
+    @PrimaryKey
     private String id;
 
+    @Column
     private Integer points;
 
+    @Column
     private LocalDate date;
-    
-    @DBRef
-    private Transaction transaction;
+
+    @Column("transaction_id")
+    private String transactionId;
+
+    @Column("client_id")
+    private String clientId;
+
+    @Column("user_id")
+    private String userId;
 }
